@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block sidebar %}
+{% include 'components/sidenav.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+	<!-- Page Content -->
+	<main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+		{% if messages %}
+		<div class="mb-4">
+			{% for message in messages %}
+			<div class="p-4 {% if message.tags == 'error' %}bg-red-100 border-l-4 border-red-500 text-red-700{% else %}bg-emerald-100 border-l-4 border-emerald-500 text-emerald-700{% endif %}">
+				{{ message }}
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+
+		{% block admin_content %}{% endblock %}
+	</main>
+</div>
+{% endblock %}

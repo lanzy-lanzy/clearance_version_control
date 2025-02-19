@@ -1,0 +1,49 @@
+<nav x-data="{ isOpen: true }" 
+     class="bg-emerald-900 sticky top-0 h-screen transition-all duration-300 flex flex-col" 
+     :class="isOpen ? 'w-64' : 'w-20'">
+    
+    <div class="p-6 flex-grow" :class="isOpen ? '' : 'px-4'">
+        <!-- Toggle Button -->
+        <button @click="isOpen = !isOpen" 
+                class="absolute -right-3 top-10 bg-emerald-800 rounded-full p-1.5 text-white hover:bg-emerald-700">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                 class="h-5 w-5 transition-transform duration-300" 
+                 :class="isOpen ? 'rotate-0' : 'rotate-180'" 
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+
+        <div class="flex items-center gap-3 mb-8" :class="isOpen ? '' : 'justify-center'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+            </svg>
+            <h2 x-show="isOpen" class="text-2xl font-bold text-white">BH Owner Portal</h2>
+        </div>
+
+        <ul class="space-y-4">
+            <li>
+                <a href="{% url 'bh_owner_dashboard' %}" 
+                   class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-emerald-800 hover:text-white rounded-lg transition-all duration-200"
+                   :class="isOpen ? '' : 'justify-center px-2'">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                    <span x-show="isOpen">Dashboard</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Logout Section -->
+    <div class="p-6 border-t border-emerald-800" :class="isOpen ? '' : 'px-4'">
+        <a href="{% url 'logout' %}" 
+           class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-emerald-800 hover:text-white rounded-lg transition-all duration-200"
+           :class="isOpen ? '' : 'justify-center px-2'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
+            </svg>
+            <span x-show="isOpen">Logout</span>
+        </a>
+    </div>
+</nav>

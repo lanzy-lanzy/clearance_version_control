@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Final Examination Permit{% endblock %}
+{% block sidebar %}
+{% include "components/program_chair_sidenav.html" %}
+{% endblock %}
+{% block content %}
+<div id="print-section" class="max-w-4xl mx-auto p-8">
+    <!-- Main Permit Container with Gradient Border -->
+    <div class="border-4 border-emerald-600 p-8 bg-white shadow-2xl relative" style="background: linear-gradient(to right, #ffffff, #f0fdf4, #ffffff);">
+        <!-- Decorative Corner Patterns with Enhanced Design -->
+        <div class="absolute top-0 left-0 w-20 h-20 border-l-4 border-t-4 border-emerald-600 -m-1 rounded-tl-lg"></div>
+        <div class="absolute top-0 right-0 w-20 h-20 border-r-4 border-t-4 border-emerald-600 -m-1 rounded-tr-lg"></div>
+        <div class="absolute bottom-0 left-0 w-20 h-20 border-l-4 border-b-4 border-emerald-600 -m-1 rounded-bl-lg"></div>
+        <div class="absolute bottom-0 right-0 w-20 h-20 border-r-4 border-b-4 border-emerald-600 -m-1 rounded-br-lg"></div>
+
+        <!-- Enhanced Header Section with Dynamic Logo -->
+        <div class="text-center mb-8">
+            <!-- Dynamic Logo -->
+            <div class="w-24 h-24 mx-auto mb-4">
+                <img src="{% static logo_url %}" alt="{{ student.program_chair.designation }} Logo" class="w-full h-full object-contain">
+            </div>
+            <h1 class="text-2xl font-bold text-emerald-800 tracking-wider">J.H. CERILLES STATE COLLEGE</h1>
+            <h2 class="text-xl font-semibold text-emerald-700 mt-2">DUMINGAG CAMPUS</h2>
+            <p class="text-emerald-600 italic">Dumingag, Zamboanga del Sur</p>
+            <div class="mt-6">
+                <h3 class="text-lg font-bold text-emerald-700">School of Engineering and Technology</h3>
+                <h4 class="text-xl font-bold mt-2 bg-emerald-700 text-white py-2 px-4 inline-block rounded-lg transform -skew-x-6">
+                     EXAMINATION PERMIT
+                </h4>
+            </div>
+        </div>
+
+        <!-- Enhanced Student Information Section -->
+        <div class="mb-8 space-y-4 bg-emerald-50 p-4 rounded-lg">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="flex items-center">
+                    <span class="font-bold text-emerald-800 w-24">NAME:</span>
+                    <span class="flex-1 border-b-2 border-emerald-600 px-2 py-1 bg-white rounded">{{ student.full_name }}</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="font-bold text-emerald-800 w-32">COURSE & YEAR:</span>
+                    <span class="flex-1 border-b-2 border-emerald-600 px-2 py-1 bg-white rounded">{{ student.course }} {{ student.year_level }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Subjects and Signatures Table -->
+        <div class="mt-8">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-emerald-700 text-white">
+                        <th class="border-2 border-emerald-600 p-3 w-1/2 rounded-tl-lg">SUBJECT</th>
+                        <th class="border-2 border-emerald-600 p-3 w-1/2 rounded-tr-lg">INSTRUCTOR'S SIGNATURE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in "123456789"|make_list %}
+                    <tr class="hover:bg-emerald-50">
+                        <td class="border-2 border-emerald-600 p-4 text-emerald-800">
+                            <div class="h-8 flex items-center px-2"></div>
+                        </td>
+                        <td class="border-2 border-emerald-600 p-4">
+                            <div class="h-8 flex items-center justify-center">
+                                <div class="w-48 border-b border-emerald-400 border-dashed"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Program Chair Signature Section (Centered) -->
+        <div class="mt-12 text-center">
+            <!-- Display the program chair's full name on top -->
+            <p class="text-lg font-bold text-emerald-800">
+                {{ student.program_chair.user.get_full_name }}
+            </p>
+            <div class="border-t-2 border-emerald-600 pt-2 inline-block px-12">
+                <p class="font-semibold text-emerald-800">SET DEAN</p>
+            </div>
+        </div>
+
+        <!-- Watermark Text -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+            <span class="text-6xl font-bold text-emerald-800 rotate-45">JHCSC</span>
+        </div>
+
+        <!-- Print Button (Hidden during print) -->
+        <div class="mt-8 text-center print:hidden">
+            <button onclick="window.print()" 
+                    class="bg-emerald-600 text-white px-8 py-3 rounded-lg hover:bg-emerald-700 transition-colors duration-200 shadow-lg">
+                <span class="flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print Permit
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+  @media print {
+      /* Reset background and remove shadows for cleaner print */
+      .shadow-2xl, button, svg { 
+          box-shadow: none !important; 
+      }
+      body, html {
+         background: #fff;
+         color: #000;
+         font-family: "Times New Roman", serif;
+      }
+      /* Hide interactive elements */
+      .print\:hidden {
+         display: none !important;
+      }
+      /* Hide everything initially */
+      body * {
+          visibility: hidden;
+      }
+      /* Then make only the print section visible */
+      #print-section, #print-section * {
+          visibility: visible;
+      }
+      /* Center the print section and scale to fit one page */
+      #print-section {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%) scale(0.88);
+          transform-origin: top center;
+          width: 100%;
+      }
+      /* Adjust tables and borders for prints */
+      table {
+          border: 1px solid #000;
+      }
+      th, td {
+          border: 1px solid #000;
+      }
+      /* Ensure colors print accurately */
+      * {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+      }
+      @page {
+          size: A4;
+          margin: 1cm;
+      }
+  }
+</style>
+{% endblock %}

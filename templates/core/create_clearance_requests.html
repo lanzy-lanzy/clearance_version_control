@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load dict_extras %}
+
+{% block title %}Create Clearance Request{% endblock %}
+
+{% block sidebar %}
+{% include "components/student_sidenav.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-emerald-600 py-6 px-8">
+            <h2 class="text-3xl font-bold text-white text-center">
+                <i class="fas fa-file-alt mr-2"></i>New Semester Clearance
+            </h2>
+            <p class="mt-2 text-center text-emerald-100">
+                Create a clearance request for the current semester
+            </p>
+        </div>
+
+        <!-- Form -->
+        <div class="p-8">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-6 p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Current Details Card -->
+            <div class="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Current Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Student Name</p>
+                        <p class="font-medium">{{ request.user.get_full_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Student ID</p>
+                        <p class="font-medium">{{ request.user.student.student_id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Course</p>
+                        <p class="font-medium">{{ request.user.student.course.code }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Year Level</p>
+                        <p class="font-medium">{{ request.user.student.get_year_level_display }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- School Year Selection -->
+                <div>
+                    <label for="school_year" class="block text-sm font-medium text-gray-700 mb-2">School Year</label>
+                    <select name="school_year" id="school_year" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                        {% for year in school_years %}
+                            <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Semester Selection -->
+                <div>
+                    <label for="semester" class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                    <select name="semester" id="semester" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                        {% for value, label in semesters %}
+                            <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit"
+                            class="w-full flex justify-center items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-md transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Create Clearance Requests
+                    </button>
+                </div>
+            </form>
+
+            <!-- Information Cards -->
+            <div class="mt-8 space-y-4">
+                <!-- Important Information -->
+                <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">Important Information</h3>
+                    <ul class="list-disc list-inside text-blue-700 space-y-2">
+                        <li>You can only create one clearance request per semester</li>
+                        <li>Make sure to select the correct school year and semester</li>
+                        <li>All required offices will be automatically included</li>
+                        <li>You can track the status of your clearance in the dashboard</li>
+                    </ul>
+                </div>
+
+                <!-- Process Timeline -->
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Clearance Process</h3>
+                    <ol class="relative border-l border-gray-300 ml-3 space-y-4">
+                        <li class="ml-6">
+                            <span class="absolute flex items-center justify-center w-6 h-6 bg-emerald-100 rounded-full -left-3 ring-8 ring-white">
+                                <span class="text-emerald-600 text-sm">1</span>
+                            </span>
+                            <h4 class="font-semibold text-gray-900">Submit Request</h4>
+                            <p class="text-sm text-gray-600">Create your clearance request for the current semester</p>
+                        </li>
+                        <li class="ml-6">
+                            <span class="absolute flex items-center justify-center w-6 h-6 bg-emerald-100 rounded-full -left-3 ring-8 ring-white">
+                                <span class="text-emerald-600 text-sm">2</span>
+                            </span>
+                            <h4 class="font-semibold text-gray-900">Office Review</h4>
+                            <p class="text-sm text-gray-600">Each office will review your clearance request</p>
+                        </li>
+                        <li class="ml-6">
+                            <span class="absolute flex items-center justify-center w-6 h-6 bg-emerald-100 rounded-full -left-3 ring-8 ring-white">
+                                <span class="text-emerald-600 text-sm">3</span>
+                            </span>
+                            <h4 class="font-semibold text-gray-900">Track Progress</h4>
+                            <p class="text-sm text-gray-600">Monitor the status of your clearance in the dashboard</p>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Contact Support -->
+                <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <h3 class="text-lg font-semibold text-amber-800 mb-2">Need Help?</h3>
+                    <p class="text-amber-700">
+                        If you encounter any issues or have questions, please contact the registrar's office or your program chair for assistance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

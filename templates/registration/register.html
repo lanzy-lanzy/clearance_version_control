@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block head %}
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+	<title>Student Registration - Clearance</title>
+	<style>
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+	</style>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+	{% include 'components/navbar.html' %}
+	<div class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+		<div class="max-w-lg w-full">
+			<div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fadeInUp_0.5s_ease-out]">
+				<div class="bg-emerald-600 py-6 px-8">
+					<h2 class="text-3xl font-bold text-white text-center">
+						<i class="fas fa-user-plus mr-2 text-emerald-200"></i>Student Registration
+					</h2>
+					<p class="mt-2 text-center text-teal-100">Create your account to start your clearance journey</p>
+				</div>
+				<div class="py-8 px-8">
+					{% if messages %}
+						<div class="mb-6">
+							{% for message in messages %}
+								<div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-emerald-100 text-emerald-700{% else %}bg-yellow-100 text-yellow-700{% endif %}">
+									{{ message }}
+									{% if message.tags == 'success' %}
+										<p class="mt-2 text-sm">Your account is pending admin approval. You will receive an email once your account is approved.</p>
+									{% endif %}
+								</div>
+							{% endfor %}
+						</div>
+					{% endif %}
+					<form method="POST" class="space-y-6">
+						{% csrf_token %}
+						<!-- Username -->
+						<div>
+							<label for="username" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-user mr-2 text-emerald-600"></i>Username
+							</label>
+							<input type="text" name="username" id="username" required
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+						</div>
+						<!-- Names -->
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div>
+								<label for="first_name" class="block text-sm font-medium text-gray-700">
+									<i class="fas fa-user-circle mr-2 text-emerald-600"></i>First Name
+								</label>
+								<input type="text" name="first_name" id="first_name" required
+											 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+							</div>
+							<div>
+								<label for="last_name" class="block text-sm font-medium text-gray-700">
+									<i class="fas fa-user-circle mr-2 text-emerald-600"></i>Last Name
+								</label>
+								<input type="text" name="last_name" id="last_name" required
+											 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+							</div>
+						</div>
+						<!-- Email -->
+						<div>
+							<label for="email" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-envelope mr-2 text-emerald-600"></i>Email
+							</label>
+							<input type="email" name="email" id="email" required
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+						</div>
+						<!-- Password -->
+						<div>
+							<label for="password" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-lock mr-2 text-emerald-600"></i>Password
+							</label>
+							<input type="password" name="password" id="password" required
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+						</div>
+						<div>
+							<label for="password2" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-lock mr-2 text-emerald-600"></i>Confirm Password
+							</label>
+							<input type="password" name="password2" id="password2" required
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+						</div>
+						<!-- Student Information -->
+						<div>
+							<label for="student_id" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-id-card mr-2 text-emerald-600"></i>Student ID
+							</label>
+							<input type="text" name="student_id" id="student_id" required
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+						</div>
+						<!-- Dean Selection -->
+						<div>
+							<label for="program_chair" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-user-tie mr-2 text-emerald-600"></i>Choose your Dean
+							</label>
+							<select name="program_chair" id="program_chair" required
+									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+								<option value="">Select your dean</option>
+								{% for chair in program_chairs %}
+									{% if 'SSB' not in chair.dean.name %}
+										<option value="{{ chair.id }}" data-dean="{{ chair.dean.name }}">
+											{{ chair.user.get_full_name }} - {{ chair.dean.name }}
+										</option>
+									{% endif %}
+								{% endfor %}
+							</select>
+						</div>
+
+
+						<!-- Course Selection -->
+						<div>
+							<label for="course" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-book mr-2 text-emerald-600"></i>Course
+							</label>
+							<select name="course" id="course" required
+									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+								<option value="">Select your course</option>
+							</select>
+						</div>
+
+						<!-- Academic Details -->
+						<div>
+							<label for="year_level" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-graduation-cap mr-2 text-emerald-600"></i>Year Level
+							</label>
+							<select name="year_level" id="year_level" required
+											class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+								<option value="1">1st Year</option>
+								<option value="2">2nd Year</option>
+								<option value="3">3rd Year</option>
+								<option value="4">4th Year</option>
+							</select>
+						</div>
+
+
+						<!-- Boarder Checkbox and Dormitory Owner Dropdown -->
+						<div class="flex items-center">
+							<input type="checkbox" name="is_boarder" id="is_boarder"
+										 class="h-4 w-4 text-emerald-600 border-emerald-300 rounded focus:ring-emerald-500">
+							<label for="is_boarder" class="ml-2 block text-sm text-gray-700">
+								<i class="fas fa-home mr-2 text-emerald-600"></i>Are you a dormitory boarder?
+							</label>
+						</div>
+						<div id="dormitoryOwnerSection" class="mt-4 hidden">
+							<label for="dormitory_owner" class="block text-sm font-medium text-gray-700">
+								<i class="fas fa-user-cog mr-2 text-emerald-600"></i>Select Dormitory Owner
+							</label>
+							<select name="dormitory_owner" id="dormitory_owner"
+											class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+								{% for owner in dormitory_owners %}
+									<option value="{{ owner.id }}">{{ owner.user.get_full_name }} - {{ owner.office.name }}</option>
+								{% endfor %}
+							</select>
+						</div>
+						<!-- Submit Button -->
+						<div>
+							<button type="submit"
+											class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition">
+								Register
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+<script>
+	const isBoarderCheckbox = document.getElementById('is_boarder');
+	const dormitoryOwnerSection = document.getElementById('dormitoryOwnerSection');
+
+	isBoarderCheckbox.addEventListener('change', () => {
+		if (isBoarderCheckbox.checked) {
+			dormitoryOwnerSection.classList.remove('hidden');
+		} else {
+			dormitoryOwnerSection.classList.add('hidden');
+		}
+	});
+</script>
+
+<script>
+const coursesBySchool = {
+	'SET DEAN': ['BSIT', 'BSCS'],
+	'STE DEAN': ['BPED', 'BEED', 'BSED', 'BAELS', 'BSMATH'],
+	'SOCJE DEAN': ['BSCRIM', 'BSISM'],
+	'SAFES DEAN': ['BSA', 'BSAES', 'BCF']
+};
+
+const programChairSelect = document.getElementById('program_chair');
+const courseSelect = document.getElementById('course');
+
+programChairSelect.addEventListener('change', function() {
+	const selectedOption = this.options[this.selectedIndex];
+	const deanName = selectedOption.getAttribute('data-dean');
+	console.log('Selected Dean:', deanName); // Debug line
+	const courses = coursesBySchool[deanName] || [];
+	console.log('Available Courses:', courses); // Debug line
+	
+	courseSelect.innerHTML = '<option value="">Select your course</option>';
+	
+	courses.forEach(course => {
+		const option = document.createElement('option');
+		option.value = course;
+		option.textContent = course;
+		courseSelect.appendChild(option);
+	});
+});
+</script>
+
+{% endblock %}

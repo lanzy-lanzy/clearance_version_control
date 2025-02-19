@@ -1,0 +1,593 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<!-- Main Dashboard Container -->
+<div class="p-6 space-y-8">
+    <!-- Dashboard Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+        <p class="text-gray-600 mt-2">System overview and management statistics</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <a href="{% url 'admin_students' %}" class="flex items-center p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="p-3 rounded-full bg-emerald-100 mr-4">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </div>
+            <span class="text-gray-700 font-medium">Manage Students</span>
+        </a>
+        <a href="{% url 'admin_staff' %}" class="flex items-center p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="p-3 rounded-full bg-blue-100 mr-4">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656.126-1.283.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            </div>
+            <span class="text-gray-700 font-medium">Manage Staff</span>
+        </a>
+        <a href="{% url 'admin_offices' %}" class="flex items-center p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="p-3 rounded-full bg-purple-100 mr-4">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            </div>
+            <span class="text-gray-700 font-medium">Manage Offices</span>
+        </a>
+        <a href="{% url 'admin_settings' %}" class="flex items-center p-4 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <div class="p-3 rounded-full bg-amber-100 mr-4">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </div>
+            <span class="text-gray-700 font-medium">System Settings</span>
+        </a>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Students Card -->
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div class="p-3 rounded-full bg-white/20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-white/80 text-sm">Total Students</p>
+                    <p class="text-3xl font-bold text-white">{{ total_students }}</p>
+                </div>
+            </div>
+            <div class="mt-4 text-white/80 text-sm">
+                <span class="flex items-center">
+                    <span class="mr-2">↑</span>
+                    <span>{{ new_students_count }} new this month</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Staff Card -->
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div class="p-3 rounded-full bg-white/20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656.126-1.283.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-white/80 text-sm">Total Staff</p>
+                    <p class="text-3xl font-bold text-white">{{ total_staff }}</p>
+                </div>
+            </div>
+            <div class="mt-4 text-white/80 text-sm">
+                <span class="flex items-center">
+                    <span class="mr-2">•</span>
+                    <span>{{ active_staff_count }} currently active</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Program Chairs Card -->
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div class="p-3 rounded-full bg-white/20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-white/80 text-sm">Program Chairs</p>
+                    <p class="text-3xl font-bold text-white">{{ total_program_chairs }}</p>
+                </div>
+            </div>
+            <div class="mt-4 text-white/80 text-sm">
+                <span class="flex items-center">
+                    <span class="mr-2">•</span>
+                    <span>{{ programs_count }} total programs</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Clearances Card -->
+        <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div class="p-3 rounded-full bg-white/20">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-white/80 text-sm">Total Clearances</p>
+                    <p class="text-3xl font-bold text-white">{{ clearance_stats.total }}</p>
+                </div>
+            </div>
+            <div class="mt-4 text-white/80 text-sm">
+                <span class="flex items-center">
+                    <span class="mr-2">↑</span>
+                    <span>{{ new_clearances_count }} new this week</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <!-- Clearance Statistics -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Clearance Statistics</h2>
+                    <select class="form-select text-sm border-gray-300 rounded-lg focus:border-emerald-500 focus:ring-emerald-500">
+                        <option>This Month</option>
+                        <option>Last Month</option>
+                        <option>Last 3 Months</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-amber-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-amber-600">{{ clearance_stats.pending }}</div>
+                        <div class="text-sm text-amber-600">Pending</div>
+                    </div>
+                    <div class="bg-emerald-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-emerald-600">{{ clearance_stats.approved }}</div>
+                        <div class="text-sm text-emerald-600">Approved</div>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-red-600">{{ clearance_stats.denied }}</div>
+                        <div class="text-sm text-red-600">Denied</div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <canvas id="clearanceChart" class="w-full h-64"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Recent Activity</h2>
+                <div class="space-y-4">
+                    {% for activity in recent_activities %}
+                    <div class="flex items-center p-4 bg-gray-50 rounded-lg">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {% if activity.type == 'clearance' %}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    {% elif activity.type == 'user' %}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    {% else %}
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    {% endif %}
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-grow">
+                            <p class="text-gray-800">{{ activity.description }}</p>
+                            <p class="text-sm text-gray-500">{{ activity.timestamp|timesince }} ago</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Office Overview -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden col-span-1 xl:col-span-2">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Office Overview</h2>
+                    <button class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors duration-200">
+                        View All Offices
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff Count</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Requests</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for office in offices %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <span class="text-lg font-medium text-gray-600">{{ office.name|slice:":2" }}</span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ office.name }}</div>
+                                            <div class="text-sm text-gray-500">{{ office.location }}</div>
+                                        </div>
+                                    </div>
+<<<<<<< HEAD
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ office.staff_count }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                        {% if office.pending_requests > 0 %}
+                                            bg-amber-100 text-amber-800
+                                        {% else %}
+                                            bg-emerald-100 text-emerald-800
+                                        {% endif %}">
+                                        {{ office.pending_requests }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                        {% if office.is_active %}
+                                            bg-emerald-100 text-emerald-800
+                                        {% else %}
+                                            bg-gray-100 text-gray-800
+                                        {% endif %}">
+                                        {% if office.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <a href="#" class="text-emerald-600 hover:text-emerald-900 mr-3">Edit</a>
+                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+=======
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ office.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ office.staff_count }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                    {% if office.pending_requests > 0 %}
+                                        bg-amber-100 text-amber-800
+                                    {% else %}
+                                        bg-emerald-100 text-emerald-800
+                                    {% endif %}">
+                                    {{ office.pending_requests }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                    {% if office.is_active %}
+                                        bg-emerald-100 text-emerald-800
+                                    {% else %}
+                                        bg-gray-100 text-gray-800
+                                    {% endif %}">
+                                    {% if office.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending User Approvals -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Pending User Approvals</h2>
+                {% if pending_approvals %}
+                <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+                    {{ pending_approvals|length }} Pending
+                </span>
+                {% endif %}
+            </div>
+            {% if pending_approvals %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for pending_user in pending_approvals %}
+                        <tr class="hover:bg-gray-50 transition-colors" id="user-row-{{ pending_user.id }}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full object-cover" 
+                                             src="{{ pending_user.get_profile_picture_url }}" 
+                                             alt="{{ pending_user.get_full_name }}'s profile picture">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ pending_user.get_full_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ pending_user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ pending_user.student.student_id }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ pending_user.student.course }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ pending_user.date_joined|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button onclick="showUserDetails('{{ pending_user.id }}')"
+                                        class="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    View
+                                </button>
+                                <button onclick="approveUser('{{ pending_user.id }}')"
+                                        class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Approve
+                                </button>
+                                <button onclick="showRejectModal('{{ pending_user.id }}')"
+                                        class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Reject
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+>>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No pending approvals</h3>
+                <p class="mt-1 text-sm text-gray-500">All student registrations have been processed.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userDetailsModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Student Registration Details</h3>
+                <button onclick="closeUserDetails()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="userDetailsContent" class="space-y-4">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900">Reject Registration</h3>
+                <form id="rejectForm" class="mt-2">
+                    {% csrf_token %}
+                    <textarea name="reason" class="w-full p-2 border rounded-md" rows="4" required 
+                              placeholder="Please provide a reason for rejection"></textarea>
+                    <div class="mt-4 flex justify-end gap-2">
+                        <button type="button" onclick="closeRejectModal()" 
+                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md">Cancel</button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Reject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock admin_content %}
+
+<<<<<<< HEAD
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Clearance Statistics Chart
+    const ctx = document.getElementById('clearanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Clearances',
+                data: [65, 59, 80, 81, 56, 55],
+                fill: true,
+                borderColor: 'rgb(16, 185, 129)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+=======
+<script>
+let currentUserId = null;
+
+function showUserDetails(userId) {
+    currentUserId = userId;
+    const modal = document.getElementById('userDetailsModal');
+    const content = document.getElementById('userDetailsContent');
+    
+    // Fetch user details
+    fetch(`/api/user-details/${userId}/`)
+        .then(response => response.json())
+        .then(data => {
+            content.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <p class="mt-1 text-sm text-gray-900">${data.full_name}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Student ID</label>
+                        <p class="mt-1 text-sm text-gray-900">${data.student_id}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <p class="mt-1 text-sm text-gray-900">${data.email}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Course</label>
+                        <p class="mt-1 text-sm text-gray-900">${data.course}</p>
+                    </div>
+                    <!-- Add more fields as needed -->
+                </div>
+            `;
+        });
+    
+    modal.classList.remove('hidden');
+}
+
+function closeUserDetails() {
+    const modal = document.getElementById('userDetailsModal');
+    modal.classList.add('hidden');
+    currentUserId = null;
+}
+
+function approveUser(userId) {
+    if (!confirm('Are you sure you want to approve this registration?')) return;
+
+    fetch(`/api/approve-registration/${userId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the row from the table
+            document.getElementById(`user-row-${userId}`).remove();
+            // Show success message
+            showNotification('Registration approved successfully', 'success');
+        } else {
+            showNotification(data.error || 'Failed to approve registration', 'error');
+        }
+    });
+}
+
+function showRejectModal(userId) {
+    currentUserId = userId;
+    const modal = document.getElementById('rejectModal');
+    modal.classList.remove('hidden');
+}
+
+function closeRejectModal() {
+    const modal = document.getElementById('rejectModal');
+    const form = document.getElementById('rejectForm');
+    form.reset();
+    modal.classList.add('hidden');
+    currentUserId = null;
+}
+
+document.getElementById('rejectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const reason = this.reason.value;
+    
+    fetch(`/api/reject-registration/${currentUserId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the row from the table
+            document.getElementById(`user-row-${currentUserId}`).remove();
+            // Close modal
+            closeRejectModal();
+            // Show success message
+            showNotification('Registration rejected successfully', 'success');
+        } else {
+            showNotification(data.error || 'Failed to reject registration', 'error');
+        }
+    });
+});
+
+function showNotification(message, type) {
+    // Implement your notification system here
+    // This is a basic alert, but you might want to use a more sophisticated notification system
+    alert(message);
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const userDetailsModal = document.getElementById('userDetailsModal');
+    const rejectModal = document.getElementById('rejectModal');
+    
+    if (event.target == userDetailsModal) {
+        closeUserDetails();
+    }
+    if (event.target == rejectModal) {
+        closeRejectModal();
+    }
+}
+</script>
+>>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502

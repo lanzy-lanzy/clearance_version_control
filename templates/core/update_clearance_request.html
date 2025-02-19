@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Review Clearance Request{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-emerald-900 mb-6">Review Clearance Request</h2>
+        
+        <div class="grid grid-cols-2 gap-6 mb-6">
+            <div>
+                <p class="text-gray-600">Student Name</p>
+                <p class="font-semibold">{{ clearance_request.student.user.get_full_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Student ID</p>
+                <p class="font-semibold">{{ clearance_request.student.student_id }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Office</p>
+                <p class="font-semibold">{{ clearance_request.office.name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">Current Status</p>
+                <p class="font-semibold">
+                    {% if clearance_request.status == 'approved' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            Approved
+                        </span>
+                    {% elif clearance_request.status == 'denied' %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Denied
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Pending
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <p class="text-gray-600">Request Date</p>
+                <p class="font-semibold">{{ clearance_request.request_date|date:"M d, Y H:i" }}</p>
+            </div>
+            {% if clearance_request.reviewed_date %}
+            <div>
+                <p class="text-gray-600">Review Date</p>
+                <p class="font-semibold">{{ clearance_request.reviewed_date|date:"M d, Y H:i" }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if clearance_request.status == 'pending' %}
+        <form method="post" class="mt-6">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">Remarks/Reason</label>
+                <textarea 
+                    name="remarks" 
+                    id="remarks" 
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" 
+                    rows="4"
+                    placeholder="Enter any remarks or reason for denial..."
+                    {% if status == 'denied' %}required{% endif %}
+                ></textarea>
+            </div>
+            <div class="flex gap-4">
+                <button 
+                    type="submit" 
+                    name="status" 
+                    value="approved"
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                    Approve
+                </button>
+                <button 
+                    type="submit" 
+                    name="status" 
+                    value="denied"
+                    class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                    Deny
+                </button>
+                <a 
+                    href="{% url 'bh_owner_dashboard' %}"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                    Cancel
+                </a>
+            </div>
+        </form>
+        {% else %}
+            {% if clearance_request.remarks %}
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold mb-2">Remarks</h3>
+                <p class="text-gray-700 bg-gray-50 p-4 rounded-lg">{{ clearance_request.remarks }}</p>
+            </div>
+            {% endif %}
+            <div class="mt-6">
+                <a 
+                    href="{% url 'bh_owner_dashboard' %}"
+                    class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                >
+                    Back to Dashboard
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

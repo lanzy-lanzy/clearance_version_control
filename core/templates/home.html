@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+{% load myfilters %}
+{%block sidebar %}{% endblock %}
+{% block content %}
+<div class="bg-white">
+    <!-- Hero Section with Emerald Theme -->
+    <div class="relative bg-gradient-to-r from-emerald-600 to-green-700">
+        <div class="absolute inset-0 bg-opacity-75 bg-emerald-900"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 relative">
+            <div class="text-center">
+                <div class="flex justify-center mb-8">
+                    <img src="{% static 'img/permit_logo.png' %}" alt="JHCSC Logo" class="h-32 w-32 animate-fade hover:animate-pulse transition-all duration-300">
+                </div>                
+                <h1 class="text-5xl tracking-tight font-extrabold text-white sm:text-6xl md:text-7xl">
+                    <span class="block">DIGIT'RANCE</span>
+                    <span class="block text-emerald-200 mt-2">Simple. Fast. Digital.</span>
+                </h1>
+                <p class="mt-6 max-w-md mx-auto text-lg text-emerald-100 sm:text-xl md:mt-8 md:text-2xl md:max-w-3xl">
+                    Streamline your clearance process with our modern digital platform. Get cleared faster and track your progress in real-time.
+                </p>
+            
+                <div class="mt-12 flex justify-center gap-6">
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'login' %}" class="flex items-center px-8 py-3 border-2 border-white text-base font-medium rounded-lg text-white hover:bg-white hover:text-emerald-700 transition duration-300 md:py-4 md:text-lg md:px-10">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Sign In
+                    </a>
+                    <a href="{% url 'register' %}" class="flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-emerald-700 bg-white hover:bg-emerald-50 transition duration-300 md:py-4 md:text-lg md:px-10 shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        Register Now
+                    </a>
+                    {% else %}
+                    <a href="{% if user.staff %}{% url 'staff_dashboard' %}{% elif user|has_attr:'programchair' %}{% url 'program_chair_dashboard' %}{% else %}{% url 'student_dashboard' %}{% endif %}" 
+                       class="flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 transition duration-300 md:py-4 md:text-lg md:px-10 shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Go to Dashboard
+                    </a>                    
+                    {% endif %}      
+
+                </div>           
+             </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h2 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+                    Features that make clearance easier
+                </h2>
+                <div class="w-24 h-1 bg-emerald-500 mx-auto mt-6"></div>
+            </div>
+
+            <div class="mt-20">
+                <div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Feature 1 -->
+                    <div class="flex flex-col items-center transform hover:scale-105 transition duration-300">
+                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500 text-white shadow-lg">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-8 text-xl font-bold text-gray-900">Digital Processing</h3>
+                        <p class="mt-4 text-lg text-gray-600 text-center">
+                            Complete your clearance requirements online without the hassle of paper forms.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="flex flex-col items-center transform hover:scale-105 transition duration-300">
+                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500 text-white shadow-lg">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-8 text-xl font-bold text-gray-900">Real-time Tracking</h3>
+                        <p class="mt-4 text-lg text-gray-600 text-center">
+                            Monitor your clearance status in real-time across all departments.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="flex flex-col items-center transform hover:scale-105 transition duration-300">
+                        <div class="flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500 text-white shadow-lg">
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h3 class="mt-8 text-xl font-bold text-gray-900">Secure Processing</h3>
+                        <p class="mt-4 text-lg text-gray-600 text-center">
+                            Your clearance data is protected with enterprise-grade security measures.
+                        </p>
+                    </div>                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-emerald-900">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:py-24 lg:px-8 lg:flex lg:items-center lg:justify-between">
+            <h2 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+                <span class="block">Ready to get started?</span>
+                <span class="block text-emerald-300">Create your account today.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                {% if not user.is_authenticated %}
+                <div class="inline-flex rounded-md shadow">
+                    <a href="{% url 'register' %}" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-emerald-900 bg-white hover:bg-emerald-50 transition duration-300 transform hover:scale-105">
+                        Get started
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

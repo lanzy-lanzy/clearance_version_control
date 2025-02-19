@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Clearance Details{% endblock %}
+{% block sidebar %}
+{% include "components/student_sidenav.html" %}
+{% endblock %}
+{% block content %}
+<div class="container mx-auto p-6">
+    <!-- Clearance Header -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-emerald-900">Clearance Details</h1>
+            <a href="{% url 'student_dashboard' %}" 
+               class="inline-flex items-center px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+        <p class="text-emerald-600 mt-2">
+            School Year: {{ clearance.school_year }} | Semester: {{ clearance.get_semester_display }}
+        </p>
+    </div>
+
+    <!-- Clearance Status -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-800">Overall Status</h2>
+                <p class="text-gray-600 mt-1">
+                    {% if clearance.is_cleared %}
+                        All requirements completed
+                    {% else %}
+                        Pending requirements
+                    {% endif %}
+                </p>
+            </div>
+            <span class="px-4 py-2 rounded-full {% if clearance.is_cleared %}bg-green-100 text-green-800{% else %}bg-amber-100 text-amber-800{% endif %} font-medium">
+                {% if clearance.is_cleared %}Cleared{% else %}Pending{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Clearance Requests Table -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Office Requirements</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for request in clearance_requests %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ request.office.name }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if request.status == 'approved' %}bg-green-100 text-green-800
+                                {% elif request.status == 'denied' %}bg-red-100 text-red-800
+                                {% else %}bg-amber-100 text-amber-800{% endif %}">
+                                {% if request.status == 'approved' %}
+                                    <i class="fas fa-check-circle mr-1"></i> Approved
+                                {% elif request.status == 'denied' %}
+                                    <i class="fas fa-times-circle mr-1"></i> Denied
+                                {% else %}
+                                    <i class="fas fa-clock mr-1"></i> Pending
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if request.reviewed_date %}
+                                <div class="text-sm text-gray-900">{{ request.reviewed_date|date:"M d, Y" }}</div>
+                                <div class="text-xs text-gray-500">{{ request.reviewed_date|time:"g:i A" }}</div>
+                            {% else %}
+                                <span class="text-sm text-gray-500">Not reviewed yet</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if request.status == 'denied' and request.notes %}
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" 
+                                            class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i> View Reason
+                                    </button>
+                                    <!-- Backdrop -->
+                                    <div x-show="open"
+                                         class="fixed inset-0 bg-gray-500 bg-opacity-50 transition-opacity z-40"
+                                         @click="open = false"
+                                         x-transition:enter="transition ease-out duration-300"
+                                         x-transition:enter-start="opacity-0"
+                                         x-transition:enter-end="opacity-100"
+                                         x-transition:leave="transition ease-in duration-200"
+                                         x-transition:leave-start="opacity-100"
+                                         x-transition:leave-end="opacity-0">
+                                    </div>
+                                    
+                                    <!-- Centered Modal -->
+                                    <div x-show="open" 
+                                         class="fixed inset-0 z-50 overflow-y-auto"
+                                         @click.away="open = false">
+                                        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                                            <div class="relative bg-white rounded-lg max-w-md w-full mx-auto shadow-xl transform transition-all"
+                                                 x-transition:enter="transition ease-out duration-300"
+                                                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                                                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                                                 x-transition:leave="transition ease-in duration-200"
+                                                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                                                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                                            
+                                            <!-- Close Button -->
+                                            <button @click="open = false" 
+                                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-500 focus:outline-none">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+
+                                            <div class="p-6">
+                                                <!-- Header -->
+                                                <div class="flex items-center space-x-3 mb-4">
+                                                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                                        <i class="fas fa-exclamation-circle text-2xl text-red-500"></i>
+                                                    </div>
+                                                    <div class="text-left">
+                                                        <h4 class="text-xl font-semibold text-gray-900">Denial Reason</h4>
+                                                        <p class="text-sm text-gray-500">Request was denied for the following reason:</p>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Reason Content -->
+                                                <div class="bg-red-50 rounded-lg p-4 mb-4 border border-red-100">
+                                                    <p class="text-sm text-gray-800 whitespace-pre-wrap text-left">{{ request.notes }}</p>
+                                                </div>
+
+                                                <!-- Footer -->
+                                                {% if request.reviewed_by %}
+                                                    <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                                                        <div class="flex items-center text-sm text-gray-600">
+                                                            <i class="fas fa-user-circle text-lg mr-2 text-gray-400"></i>
+                                                            <span>Reviewed by: <span class="font-medium">{{ request.reviewed_by.user.get_full_name }}</span></span>
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">
+                                                            {{ request.reviewed_date|date:"M d, Y" }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% elif request.status == 'approved' %}
+                                <span class="text-green-600">
+                                    <i class="fas fa-check-circle"></i>
+                                </span>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

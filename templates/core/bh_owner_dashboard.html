@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}BH Owner Dashboard{% endblock %}
+
+{% block sidebar %}
+{% include "components/bh_owner_sidenav.html" %}
+{% endblock %}
+
+{% block content %}
+<!-- Denial Reason Modal -->
+<div id="denialModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900">Enter Denial Reason</h3>
+            <form id="denialForm" method="POST" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="denied">
+                <textarea name="remarks" class="w-full p-2 border rounded-md" rows="4" required></textarea>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="flex">
+    <div class="flex-1 p-8 overflow-auto bg-gray-50">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- Clearance Requests Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-emerald-100 mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-3xl font-bold text-emerald-900">Clearance Requests</h2>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                    <thead class="bg-emerald-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Student ID</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Student Name</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Status</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-emerald-100">
+                        {% for request in clearance_requests %}
+                        <tr class="hover:bg-emerald-50 transition-colors duration-200">
+                            <td class="px-4 py-3 text-emerald-900">{{ request.student.student_id }}</td>
+                            <td class="px-4 py-3 font-medium text-emerald-900">{{ request.student.full_name }}</td>
+                            <td class="px-4 py-3">
+                                {% if request.status == 'approved' %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                                        Approved
+                                    </span>
+                                {% elif request.status == 'denied' %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Denied
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if request.status == 'pending' %}
+                                    <div class="flex gap-2">
+                                        <form method="POST" action="{% url 'update_clearance_request' request.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" name="status" value="approved" 
+                                                    class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                                Approve
+                                            </button>
+                                        </form>
+                                        <button onclick="showDenialModal('{% url 'update_clearance_request' request.id %}')" 
+                                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                            Deny
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDenialModal(formAction) {
+    const modal = document.getElementById('denialModal');
+    const form = document.getElementById('denialForm');
+    form.action = formAction;
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    const modal = document.getElementById('denialModal');
+    modal.classList.add('hidden');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('denialModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+</script>
+{% endblock %}

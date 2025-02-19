@@ -1,0 +1,208 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block admin_content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+	<h2 class="text-2xl font-bold text-gray-800 mb-6">Create New User</h2>
+	
+	<form method="POST" class="space-y-6">
+		{% csrf_token %}
+		
+		<!-- User Type Selection -->
+		<div>
+			<label class="block text-sm font-medium text-gray-700 mb-2">User Type</label>
+			<select name="user_type" id="user_type" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="toggleFields()">
+				<option value="student">Student</option>
+				<option value="staff">Staff</option>
+				<option value="program_chair">Program Chair</option>
+			</select>
+		</div>
+
+		<!-- Basic User Information -->
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+				<input type="text" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+				<input type="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+				<input type="text" name="first_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+				<input type="text" name="last_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+			<div class="col-span-2">
+				<label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+				<input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+		</div>
+
+		<!-- Student Fields -->
+		<div id="student_fields" class="space-y-4 hidden">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
+				<input type="text" name="student_id" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Year Level</label>
+				<select name="year_level" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+					<option value="1">1st Year</option>
+					<option value="2">2nd Year</option>
+					<option value="3">3rd Year</option>
+					<option value="4">4th Year</option>
+					<option value="5">5th Year</option>
+				</select>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Course</label>
+				<select name="course" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+					{% for course in courses %}
+					<option value="{{ course.id }}">{{ course.code }} - {{ course.name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Program Chair</label>
+				<select name="program_chair" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+					{% for pc in program_chairs %}
+					<option value="{{ pc.id }}">{{ pc.user.get_full_name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+
+		<!-- Staff Fields -->
+		<div id="staff_fields" class="space-y-4 hidden">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Dean</label>
+				<select name="staff_dean" id="staff_dean" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="updateOffices()">
+					<option value="">Select Dean</option>
+					{% for dean in deans %}
+					<option value="{{ dean.id }}">{{ dean.name }} - {{ dean.description }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Office</label>
+				<select name="office" id="office_select" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+					<option value="">First select a dean</option>
+				</select>
+			</div>
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+				<input type="text" name="role" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+			</div>
+			<div class="flex items-center">
+				<input type="checkbox" name="is_dormitory_owner" id="is_dormitory_owner" class="h-4 w-4 text-emerald-600 border-gray-300 rounded">
+				<label for="is_dormitory_owner" class="ml-2 block text-sm text-gray-700">Is Dormitory Owner</label>
+			</div>
+		</div>
+
+		<!-- Program Chair Fields -->
+		<div id="program_chair_fields" class="space-y-4 hidden">
+			<div>
+				<label class="block text-sm font-medium text-gray-700 mb-2">Dean</label>
+				<select name="dean" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+					{% for dean in deans %}
+					<option value="{{ dean.id }}">{{ dean.name }} - {{ dean.description }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+
+		<div class="flex justify-end space-x-4">
+			<a href="{% url 'admin_users' %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+			<button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">Create User</button>
+		</div>
+	</form>
+</div>
+
+<script>
+function toggleFields() {
+	const userType = document.getElementById('user_type').value;
+	const studentFields = document.getElementById('student_fields');
+	const staffFields = document.getElementById('staff_fields');
+	const programChairFields = document.getElementById('program_chair_fields');
+
+	studentFields.classList.add('hidden');
+	staffFields.classList.add('hidden');
+	programChairFields.classList.add('hidden');
+
+	if (userType === 'student') {
+		studentFields.classList.remove('hidden');
+	} else if (userType === 'staff') {
+		staffFields.classList.remove('hidden');
+	} else if (userType === 'program_chair') {
+		programChairFields.classList.remove('hidden');
+	}
+}
+
+async function updateProgramChairsAndCourses() {
+	const deanId = document.getElementById('student_dean').value;
+	const programChairSelect = document.getElementById('program_chair_select');
+	const courseSelect = document.getElementById('course_select');
+
+	// Clear current options
+	programChairSelect.innerHTML = '<option value="">Select Program Chair</option>';
+	courseSelect.innerHTML = '<option value="">Select Course</option>';
+
+	if (!deanId) return;
+
+	try {
+		// Fetch program chairs for selected dean
+		const pcResponse = await fetch(`/api/program-chairs/${deanId}/`);
+		const programChairs = await pcResponse.json();
+		programChairs.forEach(pc => {
+			const option = document.createElement('option');
+			option.value = pc.id;
+			option.textContent = pc.user.full_name;
+			programChairSelect.appendChild(option);
+		});
+
+		// Fetch courses for selected dean
+		const courseResponse = await fetch(`/api/courses/${deanId}/`);
+		const courses = await courseResponse.json();
+		courses.forEach(course => {
+			const option = document.createElement('option');
+			option.value = course.id;
+			option.textContent = course.code;
+			courseSelect.appendChild(option);
+		});
+	} catch (error) {
+		console.error('Error fetching data:', error);
+	}
+}
+
+async function updateOffices() {
+	const deanId = document.getElementById('staff_dean').value;
+	const officeSelect = document.getElementById('office_select');
+
+	// Clear current options
+	officeSelect.innerHTML = '<option value="">Select Office</option>';
+
+	if (!deanId) return;
+
+	try {
+		const response = await fetch(`/api/offices/${deanId}/`);
+		const offices = await response.json();
+		offices.forEach(office => {
+			const option = document.createElement('option');
+			option.value = office.id;
+			option.textContent = office.name;
+			officeSelect.appendChild(option);
+		});
+	} catch (error) {
+		console.error('Error fetching offices:', error);
+	}
+}
+
+// Initialize form state
+document.addEventListener('DOMContentLoaded', function() {
+	toggleFields();
+});
+</script>
+{% endblock %}

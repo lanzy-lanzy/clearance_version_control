@@ -1,0 +1,49 @@
+<nav x-data="{ isOpen: true }" 
+     class="bg-emerald-900 sticky top-0 h-screen transition-all duration-300 flex flex-col" 
+     :class="isOpen ? 'w-64' : 'w-20'">
+    
+    <div class="p-6 flex-grow" :class="isOpen ? '' : 'px-4'">
+        <!-- Toggle Button -->
+     
+
+        <div class="flex items-center gap-3 mb-8" :class="isOpen ? '' : 'justify-center'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <h2 x-show="isOpen" class="text-2xl font-bold text-white transition-opacity">Office Panel</h2>
+        </div>
+
+        <ul class="space-y-4">
+            <li>
+                <a href="{% url 'office_dashboard' %}" 
+                   class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-emerald-800 hover:text-white rounded-lg transition-all duration-200 {% if request.resolver_match.url_name == 'office_dashboard' %}bg-emerald-800 text-white{% endif %}"
+                   :class="isOpen ? '' : 'justify-center px-2'"
+                   x-data="{ tooltip: 'Dashboard' }"
+                   @mouseenter="if(!isOpen) $el.querySelector('.tooltip').classList.remove('hidden')"
+                   @mouseleave="if(!isOpen) $el.querySelector('.tooltip').classList.add('hidden')">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                    </svg>
+                    <span x-show="isOpen">Dashboard</span>
+                    <div x-show="!isOpen" class="tooltip hidden absolute left-20 bg-gray-900 text-white px-2 py-1 rounded text-sm">Dashboard</div>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Logout Section -->
+    <div class="p-6 border-t border-emerald-800" :class="isOpen ? '' : 'px-4'">
+        <a href="{% url 'logout' %}" 
+           class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-emerald-800 hover:text-white rounded-lg transition-all duration-200"
+           :class="isOpen ? '' : 'justify-center px-2'"
+           x-data="{ tooltip: 'Logout' }"
+           @mouseenter="if(!isOpen) $el.querySelector('.tooltip').classList.remove('hidden')"
+           @mouseleave="if(!isOpen) $el.querySelector('.tooltip').classList.add('hidden')">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/>
+            </svg>
+            <span x-show="isOpen">Logout</span>
+            <div x-show="!isOpen" class="tooltip hidden absolute left-20 bg-gray-900 text-white px-2 py-1 rounded text-sm">Logout</div>
+        </a>
+    </div>
+</nav>

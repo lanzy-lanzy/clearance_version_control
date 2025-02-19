@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}BH Owner Payment Dashboard{% endblock %}
+
+{% block sidebar %}
+{% include "components/bh_owner_sidenav.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="flex">
+	<div class="flex-1 p-8 overflow-auto bg-gray-50">
+		{% if messages %}
+		<div class="mb-4">
+			{% for message in messages %}
+			<div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+				{{ message }}
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+		<div class="bg-white rounded-xl shadow-lg p-6 border border-emerald-100">
+			<div class="flex items-center justify-between mb-6">
+				<div class="flex items-center gap-3">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+					</svg>
+					<h2 class="text-3xl font-bold text-emerald-900">Payment Management</h2>
+				</div>
+			</div>
+
+			<div class="overflow-x-auto">
+				<table class="min-w-full bg-white rounded-lg overflow-hidden">
+					<thead class="bg-emerald-50">
+						<tr>
+							<th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Student ID</th>
+							<th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Student Name</th>
+							{% comment %} <th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Amount</th> {% endcomment %}
+							<th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Status</th>
+							<th class="px-4 py-3 text-left text-sm font-medium text-emerald-700">Action</th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-emerald-100">
+						{% for payment in payments %}
+						<tr class="hover:bg-emerald-50 transition-colors duration-200">
+							<td class="px-4 py-3 text-emerald-900">{{ payment.student.student_id }}</td>
+							<td class="px-4 py-3 font-medium text-emerald-900">{{ payment.student.full_name }}</td>
+							{% comment %} <td class="px-4 py-3 text-emerald-900">₱{{ payment.amount }}</td> {% endcomment %}
+							<td class="px-4 py-3">
+								{% if payment.is_paid %}
+									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+										Paid
+									</span>
+								{% else %}
+									<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+										Unpaid
+									</span>
+								{% endif %}
+							</td>
+							<td class="px-4 py-3">
+								<form method="POST" action="{% url 'update_payment' payment.id %}" class="flex gap-2">
+									{% csrf_token %}
+									{% if not payment.is_paid %}
+										<button type="submit" name="action" value="paid" 
+												class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+											Mark as Paid
+										</button>
+									{% else %}
+										<button type="submit" name="action" value="unpaid" 
+												class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+											Mark as Unpaid
+										</button>
+									{% endif %}
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

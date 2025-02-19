@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block sidebar %}
+{% include 'components/program_chair_sidenav.html' %}
+{% endblock %}
+{% block title %}Profile - Program Chair{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- Profile Header -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center space-x-6">
+                    <!-- Profile Picture Section -->
+                    <div class="relative">
+                        <img src="{{ program_chair.get_profile_picture_url }}" 
+                             alt="Profile Picture"
+                             class="w-32 h-32 rounded-full object-cover border-4 border-emerald-100">
+                        
+                        <!-- Profile Picture Upload Form -->
+                        <form action="{% url 'update_profile_picture' %}" method="POST" enctype="multipart/form-data" class="relative">
+                            {% csrf_token %}
+                            <label for="profile-picture-input" 
+                                   class="absolute bottom-0 right-0 bg-emerald-600 text-white p-2 rounded-full cursor-pointer hover:bg-emerald-700 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </label>
+                            <input type="file" 
+                                   id="profile-picture-input" 
+                                   name="profile_picture"
+                                   accept="image/*"
+                                   class="hidden"
+                                   onchange="this.form.submit()">
+                        </form>
+                    </div>
+
+                    <!-- Profile Information -->
+                    <div class="flex-1">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ program_chair.user.get_full_name }}</h1>
+                        <p class="text-gray-600">Program Chair</p>
+                        <p class="text-emerald-600">{{ program_chair.dean.name }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="border-t border-gray-200 px-6 py-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Email</p>
+                        <p class="font-medium">{{ program_chair.user.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Username</p>
+                        <p class="font-medium">{{ program_chair.user.username }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Section -->
+        {% if messages %}
+        <div class="mt-4">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
