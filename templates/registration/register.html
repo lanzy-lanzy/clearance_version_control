@@ -15,6 +15,36 @@
 				transform: translateY(0);
 			}
 		}
+		
+		@keyframes spin {
+			from { transform: rotate(0deg); }
+			to { transform: rotate(360deg); }
+		}
+		
+		.input-focus-effect:focus {
+			box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+			border-color: #10B981;
+		}
+		
+		.loading-spinner {
+			display: none;
+			animation: spin 1s linear infinite;
+			width: 1.5rem;
+			height: 1.5rem;
+		}
+		
+		.btn-loading .loading-spinner {
+			display: inline-block;
+		}
+		
+		.btn-loading .btn-text {
+			display: none;
+		}
+
+		.btn-loading {
+			cursor: not-allowed;
+			opacity: 0.7;
+		}
 	</style>
 {% endblock %}
 
@@ -25,12 +55,13 @@
 	{% include 'components/navbar.html' %}
 	<div class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
 		<div class="max-w-lg w-full">
-			<div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fadeInUp_0.5s_ease-out]">
-				<div class="bg-emerald-600 py-6 px-8">
-					<h2 class="text-3xl font-bold text-white text-center">
+			<div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fadeInUp_0.5s_ease-out] hover:shadow-3xl transition-shadow duration-300">
+				<div class="bg-emerald-600 py-6 px-8 relative overflow-hidden">
+					<div class="absolute inset-0 bg-emerald-700 opacity-50 transform -skew-y-12"></div>
+					<h2 class="text-3xl font-bold text-white text-center relative z-10">
 						<i class="fas fa-user-plus mr-2 text-emerald-200"></i>Student Registration
 					</h2>
-					<p class="mt-2 text-center text-teal-100">Create your account to start your clearance journey</p>
+					<p class="mt-2 text-center text-teal-100 relative z-10">Create your account to start your clearance journey</p>
 				</div>
 				<div class="py-8 px-8">
 					{% if messages %}
@@ -45,7 +76,7 @@
 							{% endfor %}
 						</div>
 					{% endif %}
-					<form method="POST" class="space-y-6">
+					<form method="POST" class="space-y-6" id="registerForm" onsubmit="return handleSubmit(event)">
 						{% csrf_token %}
 						<!-- Username -->
 						<div>
@@ -53,7 +84,7 @@
 								<i class="fas fa-user mr-2 text-emerald-600"></i>Username
 							</label>
 							<input type="text" name="username" id="username" required
-										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 						</div>
 						<!-- Names -->
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -62,14 +93,14 @@
 									<i class="fas fa-user-circle mr-2 text-emerald-600"></i>First Name
 								</label>
 								<input type="text" name="first_name" id="first_name" required
-											 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+											 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 							</div>
 							<div>
 								<label for="last_name" class="block text-sm font-medium text-gray-700">
 									<i class="fas fa-user-circle mr-2 text-emerald-600"></i>Last Name
 								</label>
 								<input type="text" name="last_name" id="last_name" required
-											 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+											 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 							</div>
 						</div>
 						<!-- Email -->
@@ -78,7 +109,7 @@
 								<i class="fas fa-envelope mr-2 text-emerald-600"></i>Email
 							</label>
 							<input type="email" name="email" id="email" required
-										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 						</div>
 						<!-- Password -->
 						<div>
@@ -86,14 +117,14 @@
 								<i class="fas fa-lock mr-2 text-emerald-600"></i>Password
 							</label>
 							<input type="password" name="password" id="password" required
-										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 						</div>
 						<div>
 							<label for="password2" class="block text-sm font-medium text-gray-700">
 								<i class="fas fa-lock mr-2 text-emerald-600"></i>Confirm Password
 							</label>
 							<input type="password" name="password2" id="password2" required
-										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 						</div>
 						<!-- Student Information -->
 						<div>
@@ -101,7 +132,7 @@
 								<i class="fas fa-id-card mr-2 text-emerald-600"></i>Student ID
 							</label>
 							<input type="text" name="student_id" id="student_id" required
-										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+										 class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 						</div>
 						<!-- Dean Selection -->
 						<div>
@@ -109,7 +140,7 @@
 								<i class="fas fa-user-tie mr-2 text-emerald-600"></i>Choose your Dean
 							</label>
 							<select name="program_chair" id="program_chair" required
-									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 								<option value="">Select your dean</option>
 								{% for chair in program_chairs %}
 									{% if 'SSB' not in chair.dean.name %}
@@ -128,7 +159,7 @@
 								<i class="fas fa-book mr-2 text-emerald-600"></i>Course
 							</label>
 							<select name="course" id="course" required
-									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 								<option value="">Select your course</option>
 							</select>
 						</div>
@@ -139,7 +170,7 @@
 								<i class="fas fa-graduation-cap mr-2 text-emerald-600"></i>Year Level
 							</label>
 							<select name="year_level" id="year_level" required
-											class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+											class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 								<option value="1">1st Year</option>
 								<option value="2">2nd Year</option>
 								<option value="3">3rd Year</option>
@@ -161,7 +192,7 @@
 								<i class="fas fa-user-cog mr-2 text-emerald-600"></i>Select Dormitory Owner
 							</label>
 							<select name="dormitory_owner" id="dormitory_owner"
-											class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+											class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 								{% for owner in dormitory_owners %}
 									<option value="{{ owner.id }}">{{ owner.user.get_full_name }} - {{ owner.office.name }}</option>
 								{% endfor %}
@@ -169,9 +200,15 @@
 						</div>
 						<!-- Submit Button -->
 						<div>
-							<button type="submit"
-											class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition">
-								Register
+							<button type="submit" id="submitBtn"
+											class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300">
+								<span class="btn-text flex items-center">
+									<i class="fas fa-user-plus mr-2"></i>Register
+								</span>
+								<svg class="loading-spinner w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+								</svg>
 							</button>
 						</div>
 					</form>
@@ -180,45 +217,110 @@
 		</div>
 	</div>
 <script>
-	const isBoarderCheckbox = document.getElementById('is_boarder');
-	const dormitoryOwnerSection = document.getElementById('dormitoryOwnerSection');
+function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Disable the button and show spinner
+    submitBtn.disabled = true;
+    submitBtn.classList.add('btn-loading');
+    
+    // Start the spinner animation
+    const spinner = submitBtn.querySelector('.loading-spinner');
+    spinner.style.display = 'inline-block';
+    
+    // Submit the form after 2 seconds
+    setTimeout(() => {
+        form.submit();
+    }, 2000);
 
-	isBoarderCheckbox.addEventListener('change', () => {
-		if (isBoarderCheckbox.checked) {
-			dormitoryOwnerSection.classList.remove('hidden');
-		} else {
-			dormitoryOwnerSection.classList.add('hidden');
-		}
-	});
-</script>
+    return false;
+}
 
-<script>
+// Add ripple effect to inputs
+const inputs = document.querySelectorAll('input, select');
+inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        this.classList.add('scale-102');
+    });
+    input.addEventListener('blur', function() {
+        this.classList.remove('scale-102');
+    });
+});
+
+// Keep the existing dormitory owner section toggle
+const isBoarderCheckbox = document.getElementById('is_boarder');
+const dormitoryOwnerSection = document.getElementById('dormitoryOwnerSection');
+
+isBoarderCheckbox.addEventListener('change', () => {
+    if (isBoarderCheckbox.checked) {
+        dormitoryOwnerSection.classList.remove('hidden');
+    } else {
+        dormitoryOwnerSection.classList.add('hidden');
+    }
+});
+
+// Keep the existing courses by school logic
 const coursesBySchool = {
-	'SET DEAN': ['BSIT', 'BSCS'],
-	'STE DEAN': ['BPED', 'BEED', 'BSED', 'BAELS', 'BSMATH'],
-	'SOCJE DEAN': ['BSCRIM', 'BSISM'],
-	'SAFES DEAN': ['BSA', 'BSAES', 'BCF']
+    'SET DEAN': ['BSIT', 'BSCS'],
+    'STE DEAN': ['BPED', 'BEED', 'BSED', 'BAELS', 'BSMATH'],
+    'SOCJE DEAN': ['BSCRIM', 'BSISM'],
+    'SAFES DEAN': ['BSA', 'BSAES', 'BCF']
 };
 
 const programChairSelect = document.getElementById('program_chair');
 const courseSelect = document.getElementById('course');
 
 programChairSelect.addEventListener('change', function() {
-	const selectedOption = this.options[this.selectedIndex];
-	const deanName = selectedOption.getAttribute('data-dean');
-	console.log('Selected Dean:', deanName); // Debug line
-	const courses = coursesBySchool[deanName] || [];
-	console.log('Available Courses:', courses); // Debug line
-	
-	courseSelect.innerHTML = '<option value="">Select your course</option>';
-	
-	courses.forEach(course => {
-		const option = document.createElement('option');
-		option.value = course;
-		option.textContent = course;
-		courseSelect.appendChild(option);
-	});
+    const selectedOption = this.options[this.selectedIndex];
+    const deanName = selectedOption.getAttribute('data-dean');
+    const courses = coursesBySchool[deanName] || [];
+    
+    courseSelect.innerHTML = '<option value="">Select your course</option>';
+    
+    courses.forEach(course => {
+        const option = document.createElement('option');
+        option.value = course;
+        option.textContent = course;
+        courseSelect.appendChild(option);
+    });
 });
-</script>
 
+// Add input focus effect to all form controls
+const formControls = document.querySelectorAll('input, select');
+formControls.forEach(control => {
+    control.classList.add('input-focus-effect');
+});
+
+// Add loading animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-spinner {
+        display: none;
+        animation: spin 1s linear infinite;
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    
+    .btn-loading .btn-text {
+        display: none;
+    }
+    
+    .btn-loading .loading-spinner {
+        display: inline-block;
+    }
+
+    .btn-loading {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}

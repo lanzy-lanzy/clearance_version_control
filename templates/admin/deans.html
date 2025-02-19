@@ -250,15 +250,19 @@
 
     // Edit modal functionality
     function editDean(deanId) {
-        // Fetch dean data and populate modal
-        const modal = document.getElementById('editDeanModal');
-        document.getElementById('editDeanId').value = deanId;
-        modal.classList.remove('hidden');
+        fetch(`/api/deans/${deanId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editDeanId').value = deanId;
+                document.getElementById('editName').value = data.name;
+                document.getElementById('editDescription').value = data.description || '';
+                document.getElementById('editDeanModal').classList.remove('hidden');
+            });
     }
 
     function closeEditModal() {
-        const modal = document.getElementById('editDeanModal');
-        modal.classList.add('hidden');
+        document.getElementById('editDeanModal').classList.add('hidden');
+        document.getElementById('editDeanForm').reset();
     }
 
     // Close modal when clicking outside

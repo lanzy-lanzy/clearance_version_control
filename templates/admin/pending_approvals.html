@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pending Approvals - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-6 space-y-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-emerald-900">Pending Approvals</h1>
+        <p class="text-emerald-600 mt-2">Review and manage student registration requests</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Pending Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-emerald-100 mr-4">
+                    <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Total Pending</p>
+                    <p class="text-2xl font-bold text-gray-900 total-pending">{{ stats.total_pending }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Pending Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 mr-4">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Today's Pending</p>
+                    <p class="text-2xl font-bold text-gray-900 today-pending">{{ stats.today_pending }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Approved Card -->
+        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 mr-4">
+                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Total Approved</p>
+                    <p class="text-2xl font-bold text-gray-900 total-approved">{{ stats.total_approved }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex-1">
+                <input type="text" id="search" placeholder="Search by name or email..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+            </div>
+            <div class="flex-1">
+                <select id="course-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                    <option value="{{ course.name }}">{{ course.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button onclick="resetFilters()" 
+                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                Reset Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Pending Approvals Table -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        {% if pending_approvals %}
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Applied</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for student in pending_approvals %}
+                <tr id="student-row-{{ student.id }}" class="hover:bg-gray-50">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                    <span class="text-emerald-600 font-medium">
+                                        {{ student.user.first_name|make_list|first }}{{ student.user.last_name|make_list|first }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ student.user.get_full_name }}</div>
+                                <div class="text-sm text-gray-500">{{ student.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                            {{ student.course.name }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ student.user.date_joined|date:"M d, Y" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="viewDetails('{{ student.id }}')" 
+                                class="text-emerald-600 hover:text-emerald-900 mr-3">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button onclick="approveStudent('{{ student.id }}')" 
+                                class="text-green-600 hover:text-green-900 mr-3">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button onclick="showRejectModal('{{ student.id }}')" 
+                                class="text-red-600 hover:text-red-900">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
+                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">All Caught Up!</h3>
+            <p class="text-gray-500">No pending student approvals at this time.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Student Details Modal -->
+<div id="details-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Student Details</h3>
+            <button onclick="closeModal('details-modal')" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="student-details-content">
+            <!-- Content will be loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="reject-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Reject Student</h3>
+            <div class="mt-2 px-7 py-3">
+                <textarea id="rejection-reason" 
+                          class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-emerald-500" 
+                          rows="4"
+                          placeholder="Enter reason for rejection..."></textarea>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button onclick="closeModal('reject-modal')"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2 hover:bg-gray-300">
+                    Cancel
+                </button>
+                <button onclick="rejectStudent()" 
+                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    Confirm Rejection
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedStudentId = null;
+
+function viewDetails(studentId) {
+    selectedStudentId = studentId;
+    // Make AJAX call to get student details
+    // Show details modal
+    document.getElementById('details-modal').classList.remove('hidden');
+}
+
+function approveStudent(studentId) {
+    if (!confirm('Are you sure you want to approve this student?')) return;
+    
+    fetch(`/dashboard/admin/approve-student/${studentId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`student-row-${studentId}`).remove();
+            showNotification('Success', 'Student approved successfully', 'success');
+            updateStats();
+        } else {
+            showNotification('Error', data.error || 'Failed to approve student', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error', 'An error occurred while processing your request.', 'error');
+    });
+}
+
+function showRejectModal(studentId) {
+    selectedStudentId = studentId;
+    document.getElementById('reject-modal').classList.remove('hidden');
+}
+
+function rejectStudent() {
+    const reason = document.getElementById('rejection-reason').value.trim();
+    if (!reason) {
+        showNotification('Error', 'Please provide a reason for rejection.', 'error');
+        return;
+    }
+
+    fetch(`/dashboard/admin/reject-student/${selectedStudentId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`student-row-${selectedStudentId}`).remove();
+            closeModal('reject-modal');
+            showNotification('Success', 'Student rejected successfully', 'success');
+            updateStats();
+        } else {
+            showNotification('Error', data.error || 'Failed to reject student', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error', 'An error occurred while processing your request.', 'error');
+    });
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    if (modalId === 'reject-modal') {
+        document.getElementById('rejection-reason').value = '';
+    }
+    selectedStudentId = null;
+}
+
+function updateStats() {
+    fetch('/dashboard/admin/get-approval-stats/')
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('.total-pending').textContent = data.total_pending;
+            document.querySelector('.today-pending').textContent = data.today_pending;
+            document.querySelector('.total-approved').textContent = data.total_approved;
+        });
+}
+
+function filterTable() {
+    const searchTerm = document.getElementById('search').value.toLowerCase();
+    const courseFilter = document.getElementById('course-filter').value;
+    const rows = document.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        const studentName = row.querySelector('.text-gray-900').textContent.toLowerCase();
+        const studentEmail = row.querySelector('.text-gray-500').textContent.toLowerCase();
+        const courseName = row.querySelector('.bg-emerald-100').textContent.trim();
+
+        const matchesSearch = studentName.includes(searchTerm) || studentEmail.includes(searchTerm);
+        const matchesCourse = !courseFilter || courseName === courseFilter;
+
+        row.style.display = matchesSearch && matchesCourse ? '' : 'none';
+    });
+}
+
+function resetFilters() {
+    document.getElementById('search').value = '';
+    document.getElementById('course-filter').value = '';
+    filterTable();
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Add event listeners
+document.getElementById('search').addEventListener('input', filterTable);
+document.getElementById('course-filter').addEventListener('change', filterTable);
+</script>
+{% endblock %}

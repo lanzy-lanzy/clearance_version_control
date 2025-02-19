@@ -2,6 +2,7 @@
 
 {% block head %}
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <title>Login - Clearance</title>
     <style>
         @keyframes fadeInUp {
@@ -14,6 +15,28 @@
                 transform: translateY(0);
             }
         }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .input-focus-effect:focus {
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            border-color: #10B981;
+        }
+        
+        .loading-spinner {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+        
+        .btn-loading .loading-spinner {
+            display: inline-block;
+        }
+        
+        .btn-loading .btn-text {
+            display: none;
+        }
     </style>
 {% endblock %}
 
@@ -24,57 +47,64 @@
 {% include 'components/navbar.html' %}
 <div class="min-h-screen bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fadeInUp_0.5s_ease-out]">
-            <div class="bg-emerald-600 py-6 px-8">
-                <h2 class="text-3xl font-bold text-white text-center">
-                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden animate-[fadeInUp_0.5s_ease-out] hover:shadow-3xl transition-shadow duration-300">
+            <div class="bg-emerald-600 py-8 px-8 relative overflow-hidden">
+                <div class="absolute inset-0 bg-emerald-700 opacity-50 transform -skew-y-12"></div>
+                <h2 class="text-3xl font-bold text-white text-center relative z-10">
+                    <i class="fas fa-sign-in-alt mr-2 transform hover:rotate-12 transition-transform duration-300"></i>Login
                 </h2>
-                <p class="mt-2 text-center text-teal-100">Sign in to access your account</p>
+                <p class="mt-2 text-center text-teal-100 relative z-10">Sign in to access your account</p>
             </div>
             
             <div class="py-8 px-8">
                 {% if messages %}
-                    <div class="mb-6">
+                    <div class="mb-6 space-y-2">
                         {% for message in messages %}
-                            <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                            <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-emerald-100 text-emerald-700{% endif %} transform hover:scale-102 transition-transform duration-200">
                                 {{ message }}
                             </div>
                         {% endfor %}
                     </div>
                 {% endif %}
                 
-                <form method="POST" class="space-y-6">
+                <form method="POST" class="space-y-6" id="loginForm" onsubmit="return handleSubmit(event)">
                     {% csrf_token %}
                     <!-- Username -->
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700">
-                            Username
+                    <div class="transform hover:scale-102 transition-transform duration-200">
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-user text-emerald-600 mr-2"></i>Username
                         </label>
                         <input type="text" name="username" id="username" required
-                               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                               class="input-focus-effect mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all duration-200">
                     </div>
 
                     <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">
-                            Password
+                    <div class="transform hover:scale-102 transition-transform duration-200">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-lock text-emerald-600 mr-2"></i>Password
                         </label>
                         <input type="password" name="password" id="password" required
-                               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500">
+                               class="input-focus-effect mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none transition-all duration-200">
                     </div>
 
                     <!-- Submit Button -->
-                    <div>
-                        <button type="submit"
-                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition">
-                            Sign In
+                    <div class="transform hover:scale-102 transition-transform duration-200">
+                        <button type="submit" id="submitBtn"
+                                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-300">
+                            <span class="btn-text flex items-center">
+                                <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                            </span>
+                            <svg class="loading-spinner w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
                         </button>
                     </div>
 
                     <!-- Register Link -->
-                    <div class="text-center text-sm">
+                    <div class="text-center text-sm transform hover:scale-102 transition-transform duration-200">
                         <span class="text-gray-600">Don't have an account?</span>
-                        <a href="{% url 'register' %}" class="font-medium text-emerald-600 hover:text-emerald-500">
+                        <a href="{% url 'register' %}" class="font-medium text-emerald-600 hover:text-emerald-500 transition-colors duration-200">
                             Register here
                         </a>
                     </div>
@@ -83,4 +113,61 @@
         </div>
     </div>
 </div>
+
+<script>
+function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Add loading state
+    submitBtn.classList.add('btn-loading');
+    submitBtn.disabled = true;
+
+    // Delay form submission for 2 seconds
+    setTimeout(() => {
+        form.submit();
+    }, 600);
+
+    return false;
+}
+
+// Add ripple effect to inputs
+const inputs = document.querySelectorAll('input');
+inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+        this.classList.add('scale-102');
+    });
+    input.addEventListener('blur', function() {
+        this.classList.remove('scale-102');
+    });
+});
+
+// Add loading animation styles if not already present
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .loading-spinner {
+        display: none;
+        animation: spin 1s linear infinite;
+    }
+    
+    .btn-loading .loading-spinner {
+        display: inline-block;
+    }
+    
+    .btn-loading .btn-text {
+        display: none;
+    }
+
+    .btn-loading {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}

@@ -14,20 +14,54 @@
         <div class="absolute bottom-0 left-0 w-20 h-20 border-l-4 border-b-4 border-emerald-600 -m-1 rounded-bl-lg"></div>
         <div class="absolute bottom-0 right-0 w-20 h-20 border-r-4 border-b-4 border-emerald-600 -m-1 rounded-br-lg"></div>
 
-        <!-- Enhanced Header Section with Dynamic Logo -->
-        <div class="text-center mb-8">
-            <!-- Dynamic Logo -->
-            <div class="w-24 h-24 mx-auto mb-4">
-                <img src="{% static logo_url %}" alt="{{ student.program_chair.designation }} Logo" class="w-full h-full object-contain">
+        <!-- Enhanced Header Section with Dual Logos -->
+        <div class="text-center mb-8 relative">
+            <!-- Logo Container with Flex -->
+            <div class="flex justify-between items-center mb-6">
+                <!-- Static Logo (Left) -->
+                <div class="w-24 h-24">
+                    <img src="{% static 'img/permit_logo.png' %}" alt="JHCSC Logo" 
+                         class="w-full h-full object-contain transform hover:scale-105 transition-transform duration-300"
+                         style="filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));">
+                </div>
+
+                <!-- School Name (Center) -->
+                <div class="flex-1 px-4">
+                    <h1 class="text-2xl font-bold text-emerald-800 tracking-wider">J.H. CERILLES STATE COLLEGE</h1>
+                    <h2 class="text-xl font-semibold text-emerald-700 mt-2">DUMINGAG CAMPUS</h2>
+                    <p class="text-emerald-600 italic">Dumingag, Zamboanga del Sur</p>
+                </div>
+
+                <!-- Dean's Logo (Right) -->
+                <div class="w-24 h-24">
+                    {% if student.program_chair.dean.logo %}
+                        <img src="{{ student.program_chair.dean.logo.url }}" 
+                             alt="{{ student.program_chair.dean.name }} Logo" 
+                             class="w-full h-full object-contain transform hover:scale-105 transition-transform duration-300"
+                             style="filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-emerald-50 rounded-full">
+                            <span class="text-2xl font-bold text-emerald-600">
+                                {{ student.program_chair.dean.name|slice:":2"|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-            <h1 class="text-2xl font-bold text-emerald-800 tracking-wider">J.H. CERILLES STATE COLLEGE</h1>
-            <h2 class="text-xl font-semibold text-emerald-700 mt-2">DUMINGAG CAMPUS</h2>
-            <p class="text-emerald-600 italic">Dumingag, Zamboanga del Sur</p>
+
+            <!-- Department and Permit Title -->
             <div class="mt-6">
                 <h3 class="text-lg font-bold text-emerald-700">School of Engineering and Technology</h3>
-                <h4 class="text-xl font-bold mt-2 bg-emerald-700 text-white py-2 px-4 inline-block rounded-lg transform -skew-x-6">
-                     EXAMINATION PERMIT
-                </h4>
+                <div class="relative mt-4">
+                    <!-- Decorative Lines -->
+                    <div class="absolute w-1/4 h-px bg-emerald-600 left-0 top-1/2 transform -translate-y-1/2"></div>
+                    <div class="absolute w-1/4 h-px bg-emerald-600 right-0 top-1/2 transform -translate-y-1/2"></div>
+                    
+                    <!-- Permit Title -->
+                    <h4 class="text-xl font-bold inline-block bg-emerald-700 text-white py-2 px-8 rounded-lg transform -skew-x-6">
+                        EXAMINATION PERMIT
+                    </h4>
+                </div>
             </div>
         </div>
 
@@ -149,6 +183,28 @@
       @page {
           size: A4;
           margin: 1cm;
+      }
+      /* Preserve logo shadows in print */
+      img {
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
+      }
+      
+      /* Ensure logos maintain size in print */
+      .w-24 {
+          width: 6rem !important;
+          height: 6rem !important;
+      }
+      
+      /* Keep decorative lines visible in print */
+      .bg-emerald-600 {
+          background-color: #059669 !important;
+      }
+      
+      /* Maintain background colors in print */
+      .bg-emerald-700 {
+          background-color: #047857 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
       }
   }
 </style>

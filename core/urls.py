@@ -49,29 +49,12 @@ urlpatterns = [
     path('dashboard/admin/staff/<int:staff_id>/edit/', views.admin_staff_edit, name='admin_staff_edit'),
     path('dashboard/admin/settings/', views.admin_settings, name='admin_settings'),
     path('request-again/<int:request_id>/', views.request_again, name='request_again'),
+    path('api/deans/<int:dean_id>/', views.get_dean_details, name='get_dean_details'),
+   path('api/offices/detail/<int:office_id>/', views.office_detail_api, name='office_detail_api'),
+      path('dashboard/admin/pending-approvals/', views.admin_pending_approvals, name='admin_pending_approvals'),
+    path('dashboard/admin/approve-student/<int:student_id>/', views.approve_student, name='approve_student'),
+    path('dashboard/admin/reject-student/<int:student_id>/', views.reject_student, name='reject_student'),
 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

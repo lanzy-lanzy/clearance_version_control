@@ -28,6 +28,59 @@
             </div>
         </div>
 
+        <!-- Search and Filter Section -->
+        <div class="bg-white rounded-xl shadow-sm mb-6 p-6">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">School Year</label>
+                    <select name="school_year" class="w-full rounded-md border-gray-300">
+                        <option value="">All</option>
+                        {% for year in school_years %}
+                            <option value="{{ year }}" {% if current_filters.school_year == year %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <select name="semester" class="w-full rounded-md border-gray-300">
+                        <option value="">All</option>
+                        {% for sem_value, sem_label in SEMESTER_CHOICES %}
+                            <option value="{{ sem_value }}" {% if current_filters.semester == sem_value %}selected{% endif %}>{{ sem_label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select name="sort" class="w-full rounded-md border-gray-300">
+                        <option value="request_date" {% if current_filters.sort == 'request_date' %}selected{% endif %}>Request Date</option>
+                        <option value="student_name" {% if current_filters.sort == 'student_name' %}selected{% endif %}>Student Name</option>
+                        <option value="course" {% if current_filters.sort == 'course' %}selected{% endif %}>Course</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="search" 
+                               value="{{ current_filters.search }}"
+                               class="w-full rounded-md border-gray-300 pl-10" 
+                               placeholder="Search by name or ID...">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-4 flex justify-end">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors duration-150">
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <!-- Enhanced Pending Requests Table -->
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             {% if pending_requests %}
@@ -268,3 +321,12 @@ window.onclick = function(event) {
     }
 }
 </script>{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any additional JavaScript for enhanced filtering/sorting if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        // You can add client-side sorting/filtering here if needed
+    });
+</script>
+{% endblock %}

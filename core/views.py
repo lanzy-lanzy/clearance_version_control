@@ -394,19 +394,45 @@ class StudentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 def admin_deans(request):
     if request.method == 'POST':
         action = request.POST.get('action')
+        
         if action == 'add':
             name = request.POST.get('name')
             description = request.POST.get('description')
+            logo = request.FILES.get('logo')
             
-            Dean.objects.create(
+            dean = Dean.objects.create(
                 name=name,
-                description=description
+                description=description,
+                logo=logo if logo else None
             )
             messages.success(request, f'Dean {name} added successfully.')
+            
+        elif action == 'edit':
+            dean_id = request.POST.get('dean_id')
+            try:
+                dean = Dean.objects.get(id=dean_id)
+                dean.name = request.POST.get('name')
+                dean.description = request.POST.get('description')
+                
+                # Handle logo update
+                if 'logo' in request.FILES:
+                    # Delete old logo if it exists
+                    if dean.logo:
+                        dean.logo.delete(save=False)
+                    dean.logo = request.FILES['logo']
+                
+                dean.save()
+                messages.success(request, f'Dean {dean.name} updated successfully.')
+            except Dean.DoesNotExist:
+                messages.error(request, 'Dean not found.')
+                
         elif action == 'delete':
             dean_id = request.POST.get('dean_id')
             try:
                 dean = Dean.objects.get(id=dean_id)
+                # Delete the logo file when deleting the dean
+                if dean.logo:
+                    dean.logo.delete(save=False)
                 dean.delete()
                 messages.success(request, f'Dean {dean.name} deleted successfully.')
             except Dean.DoesNotExist:
@@ -991,18 +1017,26 @@ def admin_profile(request):
         'profile': profile
     })
 
-def get_current_semester():
-    current_month = timezone.now().month
-    
-    # First semester: August to December
-    if 8 <= current_month <= 12:
-        return "First"
-    # Second semester: January to May
-    elif 1 <= current_month <= 5:
-        return "Second"
-    # Summer semester: June to July
+def get_current_school_year():
+    current_date = datetime.now()
+    # If current month is January-May, school year is previous year-current year
+    # If current month is June-December, school year is current year-next year
+    if current_date.month <= 5:
+        return f"{current_date.year - 1}-{current_date.year}"
     else:
+        return f"{current_date.year}-{current_date.year + 1}"
+
+def get_current_semester():
+    current_month = datetime.now().month
+    # First semester: August-December
+    # Second semester: January-May
+    # Summer: June-July
+    if 1 <= current_month <= 5:
+        return "Second"
+    elif 6 <= current_month <= 7:
         return "Summer"
+    else:
+        return "First"
 
 @login_required
 def staff_dashboard(request):
@@ -1049,43 +1083,66 @@ def staff_dashboard(request):
 
 @login_required
 def staff_pending_requests(request):
-    """View for staff to manage their pending clearance requests."""
-    try:
-        staff = request.user.staff
-    except Staff.DoesNotExist:
-        return redirect('login')
+    # Get filter parameters from request
+    search_query = request.GET.get('search', '')
+    school_year = request.GET.get('school_year', '')
+    semester = request.GET.get('semester', '')
+    sort_by = request.GET.get('sort', 'request_date')
 
-    # Get current semester info
-    current_year = timezone.now().year
-    school_year = f"{current_year}-{current_year + 1}"
-    month = timezone.now().month
-    
-    # Determine current semester based on month
-    if 6 <= month <= 10:
-        current_semester = "1ST"
-    elif month >= 11 or month <= 3:
-        current_semester = "2ND"
-    else:
-        current_semester = "SUM"
+    # Define semester choices
+    SEMESTER_CHOICES = [
+        ('First', 'First Semester'),
+        ('Second', 'Second Semester'),
+        ('Summer', 'Summer'),
+    ]
 
-    # Get pending requests for the staff's office
+    # Start with all pending requests for the staff's office
     pending_requests = ClearanceRequest.objects.filter(
-        office=staff.office,
+        office=request.user.staff.office,
         status='pending'
-    ).select_related(
-        'student',
-        'student__user',
-        'student__course'
-    ).order_by('-request_date')
+    )
+
+    # Apply filters
+    if search_query:
+        pending_requests = pending_requests.filter(
+            Q(student__user__first_name__icontains=search_query) |
+            Q(student__user__last_name__icontains=search_query) |
+            Q(student__student_id__icontains=search_query)
+        )
+
+    if school_year:
+        pending_requests = pending_requests.filter(school_year=school_year)
+
+    if semester:
+        pending_requests = pending_requests.filter(semester=semester)
+
+    # Apply sorting
+    if sort_by == 'student_name':
+        pending_requests = pending_requests.order_by('student__user__last_name', 'student__user__first_name')
+    elif sort_by == 'course':
+        pending_requests = pending_requests.order_by('student__course__code')
+    else:  # default to request_date
+        pending_requests = pending_requests.order_by('-request_date')
+
+    # Get unique school years for the filter dropdown
+    school_years = ClearanceRequest.objects.values_list('school_year', flat=True).distinct()
 
     context = {
         'pending_requests': pending_requests,
-        'current_semester': current_semester,
-        'school_year': school_year,
-        'office': staff.office
+        'school_years': school_years,
+        'SEMESTER_CHOICES': SEMESTER_CHOICES,
+        'current_filters': {
+            'search': search_query,
+            'school_year': school_year,
+            'semester': semester,
+            'sort': sort_by,
+        },
+        'office': request.user.staff.office,
+        'school_year': get_current_school_year(),
+        'current_semester': get_current_semester(),
     }
 
-    return render(request, 'core/staff_pending_requests.html', context)  # Updated template path
+    return render(request, 'core/staff_pending_requests.html', context)
 @login_required
 @require_POST
 def approve_clearance_request(request, request_id):
@@ -1584,6 +1641,189 @@ def request_again(request, request_id):
         messages.error(request, f"Error processing request: {str(e)}")
     
     return redirect('clearance_details', clearance_id=clearance_request.clearance.id)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_dean_details(request, dean_id):
+    try:
+        dean = Dean.objects.get(id=dean_id)
+        data = {
+            'name': dean.name,
+            'description': dean.description,
+            'logo_url': dean.logo.url if dean.logo else None
+        }
+        return JsonResponse(data)
+    except Dean.DoesNotExist:
+        return JsonResponse({'error': 'Dean not found'}, status=404)
+
+def office_detail_api(request, office_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+    office = get_object_or_404(Office, id=office_id)
+    
+    # Only include the basic fields that definitely exist
+    data = {
+        'name': office.name,
+    }
+    
+    # Optionally add description if it exists
+    if hasattr(office, 'description'):
+        data['description'] = office.description
+    
+    return JsonResponse(data)
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def get_user_details(request, user_id):
+    try:
+        student = Student.objects.select_related('user', 'course').get(user_id=user_id)
+        data = {
+            'full_name': student.user.get_full_name(),
+            'student_id': student.student_id,
+            'course': student.course.name if student.course else 'N/A',
+            'date_joined': student.user.date_joined.strftime('%B %d, %Y'),
+            'email': student.user.email,
+        }
+        return JsonResponse(data)
+    except Student.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
+
+
+
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .models import Student, Course
+from django.conf import settings
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_pending_approvals(request):
+    # Get pending approvals with related data
+    pending_approvals = Student.objects.filter(
+        is_approved=False,
+        user__is_active=False
+    ).select_related('user', 'course').order_by('-user__date_joined')
+    
+    # Get statistics
+    stats = {
+        'total_pending': pending_approvals.count(),
+        'today_pending': pending_approvals.filter(
+            user__date_joined__date=timezone.now().date()
+        ).count(),
+        'total_approved': Student.objects.filter(is_approved=True).count(),
+    }
+    
+    context = {
+        'pending_approvals': pending_approvals,
+        'stats': stats,
+        'courses': Course.objects.all(),
+    }
+    return render(request, 'admin/pending_approvals.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def approve_student(request, student_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    
+    student = get_object_or_404(Student, id=student_id)
+    try:
+        # Approve the student
+        student.is_approved = True
+        student.user.is_active = True
+        student.approved_at = timezone.now()
+        student.approved_by = request.user
+        student.save()
+        student.user.save()
+
+        # Send approval email
+        context = {
+            'student_name': student.user.get_full_name(),
+            'course_name': student.course.name,
+        }
+        html_message = render_to_string('emails/student_approved.html', context)
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            'Your Registration Has Been Approved',
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [student.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully approved {student.user.get_full_name()}'
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def reject_student(request, student_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+    
+    student = get_object_or_404(Student, id=student_id)
+    reason = request.POST.get('reason', '')
+    
+    try:
+        # Send rejection email
+        context = {
+            'student_name': student.user.get_full_name(),
+            'reason': reason,
+        }
+        html_message = render_to_string('emails/student_rejected.html', context)
+        plain_message = strip_tags(html_message)
+        
+        send_mail(
+            'Registration Status Update',
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [student.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+
+        # Delete the student and user accounts
+        user = student.user
+        student.delete()
+        user.delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully rejected {student.user.get_full_name()}'
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
