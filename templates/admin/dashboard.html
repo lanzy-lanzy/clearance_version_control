@@ -229,11 +229,8 @@
                                             <div class="text-sm text-gray-500">{{ office.location }}</div>
                                         </div>
                                     </div>
-<<<<<<< HEAD
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ office.staff_count }}</div>
-                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ office.staff_count }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
                                         {% if office.pending_requests > 0 %}
@@ -254,46 +251,11 @@
                                         {% if office.is_active %}Active{% else %}Inactive{% endif %}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <a href="#" class="text-emerald-600 hover:text-emerald-900 mr-3">Edit</a>
-                                    <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
-                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-=======
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ office.name }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ office.staff_count }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                                    {% if office.pending_requests > 0 %}
-                                        bg-amber-100 text-amber-800
-                                    {% else %}
-                                        bg-emerald-100 text-emerald-800
-                                    {% endif %}">
-                                    {{ office.pending_requests }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                                    {% if office.is_active %}
-                                        bg-emerald-100 text-emerald-800
-                                    {% else %}
-                                        bg-gray-100 text-gray-800
-                                    {% endif %}">
-                                    {% if office.is_active %}Active{% else %}Inactive{% endif %}
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -374,7 +336,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
             </div>
             {% else %}
             <div class="text-center py-8">
@@ -427,7 +388,6 @@
 </div>
 {% endblock admin_content %}
 
-<<<<<<< HEAD
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -460,134 +420,132 @@
             }
         }
     });
-</script>
-{% endblock %}
-=======
-<script>
-let currentUserId = null;
-
-function showUserDetails(userId) {
-    currentUserId = userId;
-    const modal = document.getElementById('userDetailsModal');
-    const content = document.getElementById('userDetailsContent');
     
-    // Fetch user details
-    fetch(`/api/user-details/${userId}/`)
+    // User details and modal functionality
+    let currentUserId = null;
+    
+    function showUserDetails(userId) {
+        currentUserId = userId;
+        const modal = document.getElementById('userDetailsModal');
+        const content = document.getElementById('userDetailsContent');
+        
+        // Fetch user details
+        fetch(`/api/user-details/${userId}/`)
+            .then(response => response.json())
+            .then(data => {
+                content.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <p class="mt-1 text-sm text-gray-900">${data.full_name}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Student ID</label>
+                            <p class="mt-1 text-sm text-gray-900">${data.student_id}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <p class="mt-1 text-sm text-gray-900">${data.email}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Course</label>
+                            <p class="mt-1 text-sm text-gray-900">${data.course}</p>
+                        </div>
+                        <!-- Add more fields as needed -->
+                    </div>
+                `;
+            });
+        
+        modal.classList.remove('hidden');
+    }
+    
+    function closeUserDetails() {
+        const modal = document.getElementById('userDetailsModal');
+        modal.classList.add('hidden');
+        currentUserId = null;
+    }
+
+    function approveUser(userId) {
+        if (!confirm('Are you sure you want to approve this registration?')) return;
+
+        fetch(`/api/approve-registration/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
         .then(response => response.json())
         .then(data => {
-            content.innerHTML = `
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <p class="mt-1 text-sm text-gray-900">${data.full_name}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Student ID</label>
-                        <p class="mt-1 text-sm text-gray-900">${data.student_id}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Email</label>
-                        <p class="mt-1 text-sm text-gray-900">${data.email}</p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Course</label>
-                        <p class="mt-1 text-sm text-gray-900">${data.course}</p>
-                    </div>
-                    <!-- Add more fields as needed -->
-                </div>
-            `;
+            if (data.success) {
+                // Remove the row from the table
+                document.getElementById(`user-row-${userId}`).remove();
+                // Show success message
+                showNotification('Registration approved successfully', 'success');
+            } else {
+                showNotification(data.error || 'Failed to approve registration', 'error');
+            }
         });
-    
-    modal.classList.remove('hidden');
-}
+    }
 
-function closeUserDetails() {
-    const modal = document.getElementById('userDetailsModal');
-    modal.classList.add('hidden');
-    currentUserId = null;
-}
+    function showRejectModal(userId) {
+        currentUserId = userId;
+        const modal = document.getElementById('rejectModal');
+        modal.classList.remove('hidden');
+    }
 
-function approveUser(userId) {
-    if (!confirm('Are you sure you want to approve this registration?')) return;
+    function closeRejectModal() {
+        const modal = document.getElementById('rejectModal');
+        const form = document.getElementById('rejectForm');
+        form.reset();
+        modal.classList.add('hidden');
+        currentUserId = null;
+    }
 
-    fetch(`/api/approve-registration/${userId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove the row from the table
-            document.getElementById(`user-row-${userId}`).remove();
-            // Show success message
-            showNotification('Registration approved successfully', 'success');
-        } else {
-            showNotification(data.error || 'Failed to approve registration', 'error');
-        }
+    document.getElementById('rejectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const reason = this.reason.value;
+        
+        fetch(`/api/reject-registration/${currentUserId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the row from the table
+                document.getElementById(`user-row-${currentUserId}`).remove();
+                // Close modal
+                closeRejectModal();
+                // Show success message
+                showNotification('Registration rejected successfully', 'success');
+            } else {
+                showNotification(data.error || 'Failed to reject registration', 'error');
+            }
+        });
     });
-}
 
-function showRejectModal(userId) {
-    currentUserId = userId;
-    const modal = document.getElementById('rejectModal');
-    modal.classList.remove('hidden');
-}
+    function showNotification(message, type) {
+        // Implement your notification system here
+        // This is a basic alert, but you might want to use a more sophisticated notification system
+        alert(message);
+    }
 
-function closeRejectModal() {
-    const modal = document.getElementById('rejectModal');
-    const form = document.getElementById('rejectForm');
-    form.reset();
-    modal.classList.add('hidden');
-    currentUserId = null;
-}
-
-document.getElementById('rejectForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const reason = this.reason.value;
-    
-    fetch(`/api/reject-registration/${currentUserId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-        },
-        body: JSON.stringify({ reason: reason })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove the row from the table
-            document.getElementById(`user-row-${currentUserId}`).remove();
-            // Close modal
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const userDetailsModal = document.getElementById('userDetailsModal');
+        const rejectModal = document.getElementById('rejectModal');
+        
+        if (event.target == userDetailsModal) {
+            closeUserDetails();
+        }
+        if (event.target == rejectModal) {
             closeRejectModal();
-            // Show success message
-            showNotification('Registration rejected successfully', 'success');
-        } else {
-            showNotification(data.error || 'Failed to reject registration', 'error');
         }
-    });
-});
-
-function showNotification(message, type) {
-    // Implement your notification system here
-    // This is a basic alert, but you might want to use a more sophisticated notification system
-    alert(message);
-}
-
-// Close modals when clicking outside
-window.onclick = function(event) {
-    const userDetailsModal = document.getElementById('userDetailsModal');
-    const rejectModal = document.getElementById('rejectModal');
-    
-    if (event.target == userDetailsModal) {
-        closeUserDetails();
     }
-    if (event.target == rejectModal) {
-        closeRejectModal();
-    }
-}
 </script>
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
+{% endblock %}

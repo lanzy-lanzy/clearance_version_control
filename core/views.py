@@ -16,7 +16,7 @@ import os
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
-<<<<<<< HEAD
+from django.db.models import Count
 
 # PDF Generation
 from reportlab.lib import colors
@@ -24,17 +24,18 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-import json  # Add this import
+import json
+
 # Excel Generation
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl import Workbook
-from django.db import models  ## Local imports
+
+# Local imports
+from django.db import models
 from core.models import (
     ClearanceRequest, Clearance, Staff, Student, 
     Office, ProgramChair, User, Dean, Course,
-    UserProfile,  # Add this import
-    SEMESTER_CHOICES
+    UserProfile, SEMESTER_CHOICES
 )
 
 # Set up logging
@@ -42,15 +43,6 @@ logger = logging.getLogger(__name__)
 
 # Basic Views
 
-=======
-from django.db.models import Count
-# Add Office to the imports
-from .models import (
-    Student, Staff, ProgramChair, Course, 
-    Clearance, ClearanceRequest, Office
-)
-
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
 def user_logout(request):
     logout(request)
     return redirect('login')
@@ -426,65 +418,14 @@ def admin_deans(request):
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_dashboard(request):
-<<<<<<< HEAD
-    # Handle POST requests for approving/rejecting users
-    if request.method == 'POST':
-        user_id = request.POST.get('user_id')
-        action = request.POST.get('action')
-        
-        try:
-            student = Student.objects.get(id=user_id)
-            
-            if action == 'approve':
-                # Activate the user account
-                student.user.is_active = True
-                student.user.save()
-                
-                # Approve the student
-                student.is_approved = True
-                student.approval_date = timezone.now()
-                student.approval_admin = request.user
-                student.save()
-                
-                messages.success(
-                    request, 
-                    f'Student {student.user.get_full_name()} has been approved and can now login.'
-                )
-                
-            elif action == 'reject':
-                # Delete the user and related student profile
-                user = student.user
-                user.delete()  # This will cascade delete the student profile
-                messages.success(request, f'Student application has been rejected.')
-                
-        except Student.DoesNotExist:
-            messages.error(request, 'Student not found.')
-        
-        return redirect('admin_dashboard')
-
-    # Get pending approvals
-    pending_approvals = Student.objects.filter(
-        is_approved=False,
-        user__is_active=False  # Add this to only show inactive users
-=======
     # Get pending student registrations
     pending_approvals = Student.objects.filter(
         is_approved=False,
         user__is_active=False
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
     ).select_related('user', 'course').order_by('-user__date_joined')
 
     context = {
         'total_students': Student.objects.count(),
-<<<<<<< HEAD
-        'total_offices': Office.objects.count(),
-        'total_staff': Staff.objects.count(),
-        'total_program_chairs': ProgramChair.objects.count(),
-        'courses_count': Course.objects.count(),
-        'total_deans': Dean.objects.count(),
-        'pending_approvals': pending_approvals,
-        'pending_count': pending_approvals.count(),
-=======
         'total_staff': Staff.objects.count(),
         'total_program_chairs': ProgramChair.objects.count(),
         'clearance_stats': {
@@ -499,7 +440,6 @@ def admin_dashboard(request):
             pending_requests=Count('clearance_requests', filter=Q(clearance_requests__status='pending'))
         ),
         'pending_approvals': pending_approvals,
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
     }
     return render(request, 'admin/dashboard.html', context)
 
@@ -1307,11 +1247,7 @@ def staff_clearance_history(request):
         'SEMESTER_CHOICES': SEMESTER_CHOICES,
     }
 
-<<<<<<< HEAD
-    return render(request, 'core/staff_clearance_history.html', context)  # Changed from 'staff/clearance_history.html'
-=======
     return render(request, 'core/staff_clearance_history.html', context)  # Updated path
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
 @login_required
 def staff_profile(request):
     """
@@ -1466,161 +1402,34 @@ def admin_students(request):
     }
     return render(request, 'admin/students.html', context)
 
-<<<<<<< HEAD
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_staff(request):
-    # Get filter parameters from request
-    office_filter = request.GET.get('office')
-    status_filter = request.GET.get('status')
-    search_query = request.GET.get('search')
-    
-    # Base queryset with related fields
-    staff_queryset = Staff.objects.select_related('user', 'office').all()
-    
-    # Apply filters
-    if office_filter:
-        staff_queryset = staff_queryset.filter(office_id=office_filter)
-    if status_filter:
-        is_active = status_filter == 'active'
-        staff_queryset = staff_queryset.filter(user__is_active=is_active)  # Changed from is_active to user__is_active
-    if search_query:
-        staff_queryset = staff_queryset.filter(
-            Q(user__first_name__icontains=search_query) |
-            Q(user__last_name__icontains=search_query) |
-            Q(user__email__icontains=search_query)
-        )
-    
-    # Get statistics for dashboard
+    """View for managing staff members in admin dashboard."""
+    # Get all staff members with related user and office data
+    staff_members = Staff.objects.select_related(
+        'user',
+        'office'
+    ).all().order_by('office__name', 'user__first_name')
+
+    # Get all offices for the add staff form
+    offices = Office.objects.all()
+
+    # Statistics
     stats = {
-        'total_staff': Staff.objects.count(),
-        'active_staff': Staff.objects.filter(user__is_active=True).count(),  # Changed
-        'inactive_staff': Staff.objects.filter(user__is_active=False).count(),  # Changed
-        'new_staff_this_month': Staff.objects.filter(
-            user__date_joined__gte=timezone.now() - timedelta(days=30)  # Changed
-        ).count(),
+        'total_staff': staff_members.count(),
+        'total_offices': Office.objects.count(),
+        'active_staff': staff_members.filter(user__is_active=True).count(),
+        'dormitory_owners': staff_members.filter(is_dormitory_owner=True).count()
     }
-    
-    # Get all offices for filter dropdown
-    offices = Office.objects.annotate(staff_count=Count('staff'))
-    
+
     context = {
-        'staff': staff_queryset,
+        'staff_members': staff_members,
         'offices': offices,
-        'stats': stats,
-        'filters': {
-            'office': office_filter,
-            'status': status_filter,
-            'search': search_query,
-        }
+        'stats': stats
     }
+    
     return render(request, 'admin/staff.html', context)
-=======
-    return render(request, 'staff/view_request.html', context)
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-
-def get_user_details(request, user_id):
-    """API endpoint to get detailed user information"""
-    try:
-        student = Student.objects.select_related('user', 'course').get(user_id=user_id)
-        data = {
-            'full_name': f"{student.user.first_name} {student.user.last_name}",
-            'student_id': student.student_id,
-            'email': student.user.email,
-            'course': student.course.name,
-            'year_level': student.year_level,
-            'is_boarder': student.is_boarder,
-        }
-        return JsonResponse(data)
-    except Student.DoesNotExist:
-        return JsonResponse({'error': 'Student not found'}, status=404)
-
-@require_POST
-def approve_registration(request, user_id):
-    """API endpoint to approve student registration"""
-    try:
-        student = Student.objects.get(user_id=user_id)
-        student.is_approved = True
-        student.approval_date = timezone.now()
-        student.approval_admin = request.user
-        student.user.is_active = True
-        student.user.save()
-        student.save()
-        return JsonResponse({'success': True})
-    except Student.DoesNotExist:
-        return JsonResponse({'error': 'Student not found'}, status=404)
-
-@require_POST
-def reject_registration(request, user_id):
-    """API endpoint to reject student registration"""
-    try:
-        data = json.loads(request.body)
-        reason = data.get('reason')
-        
-        student = Student.objects.get(user_id=user_id)
-        student.user.delete()  # This will cascade delete the student profile
-        
-        # Could add notification logic here
-        
-        return JsonResponse({'success': True})
-    except Student.DoesNotExist:
-        return JsonResponse({'error': 'Student not found'}, status=404)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
