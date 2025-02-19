@@ -99,7 +99,6 @@
             <div class="p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Recent Requests</h2>
                 <div class="overflow-x-auto">
-<<<<<<< HEAD
                     {% if recent_requests %}
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead>
@@ -162,90 +161,9 @@
                             <p class="mt-2 text-sm text-gray-500">There are no recent clearance requests to display.</p>
                         </div>
                     {% endif %}
-=======
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Request Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            {% for request in recent_requests %}
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ request.student.full_name }}</div>
-                                    <div class="text-sm text-gray-500">{{ request.student.student_id }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ request.request_date|date:"M d, Y" }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        {% if request.status == 'pending' %}
-                                            bg-amber-100 text-amber-800
-                                        {% elif request.status == 'approved' %}
-                                            bg-emerald-100 text-emerald-800
-                                        {% else %}
-                                            bg-red-100 text-red-800
-                                        {% endif %}">
-                                        {{ request.status|title }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    {% if request.status == 'pending' %}
-                                    <div class="flex space-x-2">
-                                        <form method="POST" action="{% url 'approve_clearance_request' request.id %}" class="inline">
-                                            {% csrf_token %}
-                                            <button type="submit"
-                                                    class="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-1 rounded-md transition-colors">
-                                                Approve
-                                            </button>
-                                        </form>
-                                        <button onclick="showDenialModal('{{ request.id }}')"
-                                                class="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md transition-colors">
-                                            Deny
-                                        </button>
-                                    </div>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
-<<<<<<< HEAD
-=======
-
-<script>
-function showDenialModal(requestId) {
-    const modal = document.getElementById('denialModal');
-    const form = document.getElementById('denialForm');
-    form.action = `/deny-clearance-request/${requestId}/`;
-    modal.classList.remove('hidden');
-}
-
-function closeDenialModal() {
-    const modal = document.getElementById('denialModal');
-    const form = document.getElementById('denialForm');
-    form.reset();
-    modal.classList.add('hidden');
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('denialModal');
-    if (event.target == modal) {
-        closeDenialModal();
-    }
-}
-</script>
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502

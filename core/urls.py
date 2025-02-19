@@ -48,6 +48,7 @@ urlpatterns = [
     path('dashboard/admin/staff/add/', views.admin_staff_add, name='admin_staff_add'),
     path('dashboard/admin/staff/<int:staff_id>/edit/', views.admin_staff_edit, name='admin_staff_edit'),
     path('dashboard/admin/settings/', views.admin_settings, name='admin_settings'),
+    path('request-again/<int:request_id>/', views.request_again, name='request_again'),
 ]
 
 

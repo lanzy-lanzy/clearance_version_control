@@ -1151,8 +1151,13 @@ def deny_clearance_request(request, request_id):
             messages.error(request, 'This request has already been processed')
             return redirect(request.META.get('HTTP_REFERER', 'staff_dashboard'))
         
-        # Get reason from POST data
-        reason = request.POST.get('reason')
+        # Get reason from either JSON or POST data
+        if request.content_type == 'application/json':
+            import json
+            data = json.loads(request.body)
+            reason = data.get('reason', '')
+        else:
+            reason = request.POST.get('reason', '')
         
         if not reason:
             messages.error(request, 'A reason must be provided for denial')
@@ -1540,4 +1545,51 @@ def admin_settings(request):
         # Add other settings as needed
     }
     return render(request, 'admin/settings.html', context)
+
+@login_required
+def request_again(request, request_id):
+    """
+    Allow students to request clearance again after denial
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    
+    try:
+        # Get the original request
+        clearance_request = get_object_or_404(ClearanceRequest, id=request_id)
+        
+        # Security checks
+        if clearance_request.student.user != request.user:
+            messages.error(request, "You don't have permission to perform this action.")
+            return redirect('student_dashboard')
+            
+        if clearance_request.status != 'denied':
+            messages.error(request, "You can only request again for denied clearances.")
+            return redirect('clearance_details', clearance_id=clearance_request.clearance.id)
+        
+        # Update the existing request instead of creating a new one
+        clearance_request.status = 'pending'
+        clearance_request.reviewed_date = None
+        clearance_request.reviewed_by = None
+        clearance_request.notes = None
+        clearance_request.request_date = timezone.now()
+        clearance_request.save()
+        
+        messages.success(
+            request, 
+            f"Successfully resubmitted clearance request for {clearance_request.office.name}"
+        )
+        
+    except Exception as e:
+        messages.error(request, f"Error processing request: {str(e)}")
+    
+    return redirect('clearance_details', clearance_id=clearance_request.clearance.id)
+
+
+
+
+
+
+
+
 

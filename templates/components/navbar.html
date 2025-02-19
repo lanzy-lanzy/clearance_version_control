@@ -39,11 +39,7 @@
                             {% elif user.student %}
                                 Student
                             {% elif user.staff %}
-<<<<<<< HEAD
                                 {{ user.staff.office.name }} Staff
-=======
-                                Staff
->>>>>>> fe2b44eaf8609ca5b71b5756f71b0f6fa2ba8502
                             {% elif user.is_superuser %}
                                 Administrator
                             {% endif %}
