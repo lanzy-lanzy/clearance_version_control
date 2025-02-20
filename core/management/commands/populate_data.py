@@ -41,7 +41,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("\nCreating Deans..."))
         deans_data = [
             {
-                "name": "SET DEAN",  # Changed to match the format used in JavaScript
+                "name": "SET DEAN",
                 "description": "School of Engineering and Technology"
             },
             {
@@ -70,33 +70,25 @@ class Command(BaseCommand):
         # Create Courses
         self.stdout.write(self.style.SUCCESS("\nCreating Courses..."))
         courses_data = [
-            # SET Courses
-            {"code": "BSIT", "name": "Bachelor of Science in Information Technology", "dean": "SET DEAN"},
+            {"code": "BSIT", "name": "Bachelor of Science in Information Technology", "dean": deans[0]},
             {"code": "BSCS", "name": "Bachelor of Science in Computer Science", "dean": deans[0]},
-            # STE Courses
-            {"code": "BPED", "name": "Bachelor of Physical Education", "dean": "STE DEAN"},
-            {"code": "BEED", "name": "Bachelor of Elementary Education", "dean": "STE DEAN"},
-            {"code": "BSED", "name": "Bachelor of Secondary Education", "dean": "STE DEAN"},
-            {"code": "BAELS", "name": "Bachelor of Arts in English Language Studies", "dean": "STE DEAN"},
-            {"code": "BSMATH", "name": "Bachelor of Science in Mathematics", "dean": "STE DEAN"},
-            # SOCJE Courses
-            {"code": "BSCRIM", "name": "Bachelor of Science in Criminology", "dean": "SOCJE DEAN"},
-            {"code": "BSISM", "name": "Bachelor of Science in Industrial Security Management", "dean": "SOCJE DEAN"},
-            # SAFES Courses
-            {"code": "BSA", "name": "Bachelor of Science in Agriculture", "dean": "SAFES DEAN"},
-            {"code": "BSAES", "name": "Bachelor of Science in Agricultural Engineering Science", "dean": "SAFES DEAN"},
-            {"code": "BCF", "name": "Bachelor of Science in Commercial Farming", "dean": "SAFES DEAN"},
+            {"code": "BEED", "name": "Bachelor of Elementary Education", "dean": deans[1]},
+            {"code": "BSED", "name": "Bachelor of Secondary Education", "dean": deans[1]},
+            {"code": "BSCrim", "name": "Bachelor of Science in Criminology", "dean": deans[2]},
+            {"code": "BSAF", "name": "Bachelor of Science in Agroforestry", "dean": deans[3]},
+            {"code": "BSA", "name": "Bachelor of Science in Agriculture", "dean": deans[3]}
         ]
 
+        courses = []
         for course_data in courses_data:
-            dean = Dean.objects.get(name=course_data["dean"])
             course, created = Course.objects.get_or_create(
                 code=course_data["code"],
                 defaults={
                     "name": course_data["name"],
-                    "dean": dean
+                    "dean": course_data["dean"]
                 }
             )
+            courses.append(course)
             self.stdout.write(self.style.SUCCESS(f"{'Created' if created else 'Found'} course: {course.code}"))
 
         self.stdout.write(self.style.SUCCESS("\nCreating Offices..."))
@@ -303,7 +295,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"{'Created' if created else 'Found'} Program Chair: {pc.user.get_full_name()}"))
 
         self.stdout.write(self.style.SUCCESS("\nCreating Sample Students with Completed Clearances..."))
-        student_data = [
+        students_data = [
             {
                 "username": "set_student1",
                 "password": "student123",
@@ -314,11 +306,7 @@ class Command(BaseCommand):
                 "course": Course.objects.get(code="BSIT"),
                 "year_level": 3,
                 "is_boarder": True,
-                "bh_owner": bh_owners[0],
-                "program_chair": program_chairs[0],
-                "school_year": school_year,
-                "semester": semester,
-                "clearance_status": "pending"
+                "is_approved": True
             },
             {
                 "username": "ste_student1",
@@ -330,11 +318,8 @@ class Command(BaseCommand):
                 "course": Course.objects.get(code="BSED"),
                 "year_level": 2,
                 "is_boarder": True,
-                "bh_owner": bh_owners[1],
-                "program_chair": program_chairs[1],
-                "school_year": school_year,
-                "semester": semester,
-                "clearance_status": "pending"
+                "is_approved": False,
+                "rejection_reason": "Incomplete requirements"
             },
             {
                 "username": "cleared_student",
@@ -346,15 +331,11 @@ class Command(BaseCommand):
                 "course": Course.objects.get(code="BSIT"),
                 "year_level": 3,
                 "is_boarder": False,
-                "bh_owner": None,
-                "program_chair": program_chairs[0],
-                "school_year": school_year,
-                "semester": semester,
-                "clearance_status": "cleared"  # This student will have all clearances approved
+                "is_approved": True
             }
         ]
 
-        for student_info in student_data:
+        for student_info in students_data:
             try:
                 # Create User
                 user, created = User.objects.get_or_create(
@@ -363,7 +344,7 @@ class Command(BaseCommand):
                         "first_name": student_info["first_name"],
                         "last_name": student_info["last_name"],
                         "email": student_info["email"],
-                        "is_active": True
+                        "is_active": student_info["is_approved"]
                     }
                 )
                 if created:
@@ -378,58 +359,14 @@ class Command(BaseCommand):
                         "course": student_info["course"],
                         "year_level": student_info["year_level"],
                         "is_boarder": student_info["is_boarder"],
-                        "program_chair": student_info["program_chair"],
-                        "dormitory_owner": student_info["bh_owner"] if student_info["is_boarder"] else None,
-                        "is_approved": True,
-                        "approval_date": timezone.now(),
-                        "approval_admin": admin_user
+                        "is_approved": student_info["is_approved"],
+                        "rejection_reason": student_info.get("rejection_reason", None)
                     }
                 )
-
-                # Create or get clearance
-                clearance, clearance_created = Clearance.objects.get_or_create(
-                    student=student,
-                    school_year=student_info["school_year"],
-                    semester=student_info["semester"],
-                    defaults={
-                        "is_cleared": student_info["clearance_status"] == "cleared"
-                    }
-                )
-
-                # Get required offices
-                required_offices = Office.objects.filter(
-                    Q(office_type='OTHER') |
-                    Q(office_type=student.course.dean.name)
-                )
-
-                # Get a staff member to be the reviewer (let's use OSA staff)
-                reviewer_staff = Staff.objects.get(office__name='OSA')
-
-                # Create clearance requests for each required office
-                for office in required_offices:
-                    request_status = 'approved' if student_info["clearance_status"] == "cleared" else 'pending'
-                    clearance_request, created = ClearanceRequest.objects.get_or_create(
-                        student=student,
-                        clearance=clearance,
-                        office=office,
-                        school_year=student_info["school_year"],
-                        semester=student_info["semester"],
-                        defaults={
-                            "status": request_status,
-                            "reviewed_date": timezone.now() if request_status == 'approved' else None,
-                            "reviewed_by": reviewer_staff if request_status == 'approved' else None,
-                            "remarks": "Auto-approved during data population" if request_status == 'approved' else ""
-                        }
-                    )
-
-                # If student should be cleared, mark the clearance as cleared
-                if student_info["clearance_status"] == "cleared":
-                    clearance.is_cleared = True
-                    clearance.save()
 
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Created student: {student.user.get_full_name()} ({student.student_id}) - Clearance: {student_info['clearance_status']}"
+                        f"Created student: {student.user.get_full_name()} ({student.student_id})"
                     )
                 )
 

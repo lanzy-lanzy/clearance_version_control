@@ -26,10 +26,12 @@
                     <div class="flex flex-col items-end">
                         <span class="font-semibold text-lg text-emerald-800">
                             {% if user.programchair %}
-                                {{ user.get_full_name }}
+                                {{ user.programchair.user.get_full_name }}
                             {% elif user.student %}
-                                {{ user.student.full_name }}
+                                {{ user.student.user.get_full_name }}
                             {% elif user.staff %}
+                                {{ user.staff.user.get_full_name }}
+                            {% elif user.is_superuser %}
                                 {{ user.get_full_name }}
                             {% else %}
                                 {{ user.get_full_name }}
