@@ -121,6 +121,16 @@
                                          @click.away="open = false">
                                         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                                             <div class="relative bg-white rounded-lg max-w-md w-full mx-auto shadow-xl">
+                                                <!-- Add close button in header -->
+                                                <div class="absolute top-0 right-0 pt-4 pr-4">
+                                                    <button @click="open = false" 
+                                                            class="text-gray-400 hover:text-gray-500 focus:outline-none">
+                                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                
                                                 <div class="p-6">
                                                     <div class="flex items-center space-x-3 mb-4">
                                                         <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
@@ -133,6 +143,13 @@
                                                     </div>
                                                     <div class="bg-red-50 rounded-lg p-4 mb-4 border border-red-100">
                                                         <p class="text-sm text-gray-800 whitespace-pre-wrap text-left">{{ request.notes }}</p>
+                                                    </div>
+                                                    <!-- Add close button at bottom -->
+                                                    <div class="mt-4 flex justify-end">
+                                                        <button @click="open = false"
+                                                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                                                            Close
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>

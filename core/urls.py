@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import approve_student, reject_student, get_student_details
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -52,8 +53,10 @@ urlpatterns = [
     path('api/deans/<int:dean_id>/', views.get_dean_details, name='get_dean_details'),
    path('api/offices/detail/<int:office_id>/', views.office_detail_api, name='office_detail_api'),
       path('dashboard/admin/pending-approvals/', views.admin_pending_approvals, name='admin_pending_approvals'),
-    path('dashboard/admin/approve-student/<int:student_id>/', views.approve_student, name='approve_student'),
-    path('dashboard/admin/reject-student/<int:student_id>/', views.reject_student, name='reject_student'),
+    path('admin/approve-student/<int:student_id>/', approve_student, name='approve_student'),
+    path('admin/reject-student/<int:student_id>/', reject_student, name='reject_student'),
+    path('api/staff/<int:staff_id>/delete/', views.delete_staff, name='api_staff_delete'),
+    path('admin/student-details/<int:student_id>/', get_student_details, name='get_student_details'),
 ]
 
 

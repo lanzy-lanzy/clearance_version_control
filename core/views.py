@@ -471,6 +471,19 @@ def admin_dashboard(request):
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
+def admin_pending_approvals(request):
+    # Get all pending student registrations
+    pending_students = Student.objects.filter(user__is_active=False)
+    
+    context = {
+        'pending_students': pending_students,
+        'total_pending': pending_students.count(),
+    }
+    
+    return render(request, 'admin/pending_approvals.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
 def admin_users(request):
     context = {
         'students': Student.objects.select_related('user', 'course').all(),
@@ -1469,26 +1482,27 @@ def admin_students(request):
 def admin_staff(request):
     """View for managing staff members in admin dashboard."""
     # Get all staff members with related user and office data
-    staff_members = Staff.objects.select_related(
+    staff = Staff.objects.select_related(
         'user',
         'office'
     ).all().order_by('office__name', 'user__first_name')
 
-    # Get all offices for the add staff form
-    offices = Office.objects.all()
-
-    # Statistics
-    stats = {
-        'total_staff': staff_members.count(),
-        'total_offices': Office.objects.count(),
-        'active_staff': staff_members.filter(user__is_active=True).count(),
-        'dormitory_owners': staff_members.filter(is_dormitory_owner=True).count()
-    }
+    # Calculate statistics
+    total_staff = staff.count()
+    active_staff = staff.filter(user__is_active=True).count()
+    total_offices = Office.objects.count()
+    staff_by_office = Office.objects.annotate(
+        staff_count=Count('staff')
+    )
 
     context = {
-        'staff_members': staff_members,
-        'offices': offices,
-        'stats': stats
+        'staff': staff,
+        'statistics': {
+            'total_staff': total_staff,
+            'active_staff': active_staff,
+            'total_offices': total_offices,
+            'staff_by_office': staff_by_office,
+        }
     }
     
     return render(request, 'admin/staff.html', context)
@@ -1688,148 +1702,70 @@ def get_user_details(request, user_id):
     except Student.DoesNotExist:
         return JsonResponse({'error': 'Student not found'}, status=404)
 
-
-
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from django.contrib import messages
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from .models import Student, Course
-from django.conf import settings
-
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def admin_pending_approvals(request):
-    # Get pending approvals with related data
-    pending_approvals = Student.objects.filter(
-        is_approved=False,
-        user__is_active=False
-    ).select_related('user', 'course').order_by('-user__date_joined')
+def delete_staff(request, staff_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-    # Get statistics
-    stats = {
-        'total_pending': pending_approvals.count(),
-        'today_pending': pending_approvals.filter(
-            user__date_joined__date=timezone.now().date()
-        ).count(),
-        'total_approved': Student.objects.filter(is_approved=True).count(),
-    }
-    
-    context = {
-        'pending_approvals': pending_approvals,
-        'stats': stats,
-        'courses': Course.objects.all(),
-    }
-    return render(request, 'admin/pending_approvals.html', context)
+    try:
+        staff = Staff.objects.get(id=staff_id)
+        user = staff.user
+        staff.delete()
+        user.delete()  # This will cascade delete the staff profile and user
+        return JsonResponse({'success': True})
+    except Staff.DoesNotExist:
+        return JsonResponse({'error': 'Staff not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def approve_student(request, student_id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Invalid request method'}, status=400)
-    
-    student = get_object_or_404(Student, id=student_id)
     try:
-        # Approve the student
-        student.is_approved = True
-        student.user.is_active = True
-        student.approved_at = timezone.now()
-        student.approved_by = request.user
-        student.save()
-        student.user.save()
-
-        # Send approval email
-        context = {
-            'student_name': student.user.get_full_name(),
-            'course_name': student.course.name,
-        }
-        html_message = render_to_string('emails/student_approved.html', context)
-        plain_message = strip_tags(html_message)
-        
-        send_mail(
-            'Your Registration Has Been Approved',
-            plain_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [student.user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-
-        return JsonResponse({
-            'success': True,
-            'message': f'Successfully approved {student.user.get_full_name()}'
-        })
+        student = Student.objects.get(id=student_id)
+        student.approve_student(request.user)
+        return JsonResponse({'success': True})
+    except Student.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
-@user_passes_test(lambda u: u.is_superuser)
-def reject_student(request, student_id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Invalid request method'}, status=400)
-    
-    student = get_object_or_404(Student, id=student_id)
-    reason = request.POST.get('reason', '')
-    
+def get_student_details(request, student_id):
     try:
-        # Send rejection email
-        context = {
-            'student_name': student.user.get_full_name(),
-            'reason': reason,
+        student = Student.objects.select_related('user', 'course').get(id=student_id)
+        data = {
+            'id': student.id,
+            'full_name': f"{student.user.first_name} {student.user.last_name}",
+            'student_id': student.student_id,
+            'email': student.user.email,
+            'course': student.course.code,
+            'year_level': student.year_level,
+            'date_applied': student.user.date_joined.strftime('%Y-%m-%d %H:%M:%S'),
+            'is_boarder': student.is_boarder,
+            'profile_picture_url': student.get_profile_picture_url(),
         }
-        html_message = render_to_string('emails/student_rejected.html', context)
-        plain_message = strip_tags(html_message)
-        
-        send_mail(
-            'Registration Status Update',
-            plain_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [student.user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-
-        # Delete the student and user accounts
-        user = student.user
-        student.delete()
-        user.delete()
-
-        return JsonResponse({
-            'success': True,
-            'message': f'Successfully rejected {student.user.get_full_name()}'
-        })
+        return JsonResponse(data)
+    except Student.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@login_required
+def reject_student(request, student_id):
+    try:
+        data = json.loads(request.body)
+        reason = data.get('reason')
+        if not reason:
+            return JsonResponse({'error': 'Rejection reason is required'}, status=400)
+        
+        student = Student.objects.get(id=student_id)
+        student.reject_student(request.user, reason)
+        return JsonResponse({'success': True})
+    except Student.DoesNotExist:
+        return JsonResponse({'error': 'Student not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -58,6 +58,9 @@ class Office(models.Model):
     # New field: associate an office to a specific program (dean)
     affiliated_dean = models.ForeignKey(Dean, on_delete=models.SET_NULL, null=True, blank=True, help_text="Associate this office with a specific dean (program)")
     description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    contact_number = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -167,6 +170,14 @@ class Student(models.Model):
         self.is_approved = True
         self.approval_date = timezone.now()
         self.approval_admin = admin_user
+        self.save()
+
+    def reject_student(self, admin_user, reason):
+        """Reject a student's registration."""
+        self.is_approved = False
+        self.approval_date = None
+        self.approval_admin = None
+        # You might want to store the rejection reason in a new field
         self.save()
 
     def create_clearance_requests(self, school_year, semester):

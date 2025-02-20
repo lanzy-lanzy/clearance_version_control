@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Pending Approvals - Admin Dashboard{% endblock %}
-
 {% block content %}
+<!-- Add this right after the opening body tag -->
+{% csrf_token %}
+<!-- Rest of your existing content -->
 <div class="p-6 space-y-8">
     <!-- Header Section -->
     <div class="mb-8">
@@ -15,86 +16,55 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Total Pending Card -->
         <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-emerald-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-emerald-100 mr-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Total Pending</p>
+                    <h3 class="text-2xl font-bold text-gray-800 total-pending">{{ pending_count }}</h3>
+                </div>
+                <div class="p-3 rounded-full bg-emerald-100">
                     <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <div>
-                    <p class="text-sm text-gray-600">Total Pending</p>
-                    <p class="text-2xl font-bold text-gray-900 total-pending">{{ stats.total_pending }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Today's Pending Card -->
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 mr-4">
-                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600">Today's Pending</p>
-                    <p class="text-2xl font-bold text-gray-900 today-pending">{{ stats.today_pending }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Approved Card -->
-        <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 mr-4">
-                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600">Total Approved</p>
-                    <p class="text-2xl font-bold text-gray-900 total-approved">{{ stats.total_approved }}</p>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Filters Section -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <div class="flex flex-wrap gap-4 items-center">
+    <!-- Search and Filter Section -->
+    <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+        <div class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
-                <input type="text" id="search" placeholder="Search by name or email..." 
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                <input type="text" id="search" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                       placeholder="Search by name, email, or student ID...">
             </div>
-            <div class="flex-1">
-                <select id="course-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+            <div class="w-full md:w-48">
+                <select id="course-filter" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
                     <option value="">All Courses</option>
                     {% for course in courses %}
-                    <option value="{{ course.name }}">{{ course.name }}</option>
+                    <option value="{{ course.code }}">{{ course.code }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <button onclick="resetFilters()" 
-                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                Reset Filters
-            </button>
         </div>
     </div>
 
-    <!-- Pending Approvals Table -->
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        {% if pending_approvals %}
+    <!-- Pending Students Table -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Applied</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                {% for student in pending_approvals %}
+                {% for student in pending_students %}
                 <tr id="student-row-{{ student.id }}" class="hover:bg-gray-50">
                     <td class="px-6 py-4">
                         <div class="flex items-center">
@@ -111,10 +81,16 @@
                             </div>
                         </div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ student.student_id }}
+                    </td>
                     <td class="px-6 py-4">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
-                            {{ student.course.name }}
+                            {{ student.course.code }}
                         </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ student.year_level }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {{ student.user.date_joined|date:"M d, Y" }}
@@ -125,7 +101,7 @@
                             <i class="fas fa-eye"></i> View
                         </button>
                         <button onclick="approveStudent('{{ student.id }}')" 
-                                class="text-green-600 hover:text-green-900 mr-3">
+                                class="text-emerald-600 hover:text-emerald-900 mr-3">
                             <i class="fas fa-check"></i> Approve
                         </button>
                         <button onclick="showRejectModal('{{ student.id }}')" 
@@ -134,58 +110,51 @@
                         </button>
                     </td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                        No pending approvals found
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% else %}
-        <div class="p-8 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 mb-4">
-                <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-1">All Caught Up!</h3>
-            <p class="text-gray-500">No pending student approvals at this time.</p>
-        </div>
-        {% endif %}
     </div>
 </div>
 
-<!-- Modals -->
-<!-- Student Details Modal -->
+<!-- Details Modal -->
 <div id="details-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium text-gray-900">Student Details</h3>
-            <button onclick="closeModal('details-modal')" class="text-gray-400 hover:text-gray-500">
+            <h3 class="text-lg font-semibold text-gray-900">Student Details</h3>
+            <button onclick="document.getElementById('details-modal').classList.add('hidden')" 
+                    class="text-gray-400 hover:text-gray-500">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div id="student-details-content">
-            <!-- Content will be loaded dynamically -->
-        </div>
+        <div id="student-details-content"></div>
     </div>
 </div>
 
 <!-- Reject Modal -->
-<div id="reject-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+<div id="reject-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">Reject Student</h3>
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Reject Student Application</h3>
             <div class="mt-2 px-7 py-3">
                 <textarea id="rejection-reason" 
-                          class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-emerald-500" 
-                          rows="4"
-                          placeholder="Enter reason for rejection..."></textarea>
+                         class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-emerald-500" 
+                         rows="4"
+                         placeholder="Please provide a reason for rejection..."></textarea>
             </div>
             <div class="items-center px-4 py-3">
-                <button onclick="closeModal('reject-modal')"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md mr-2 hover:bg-gray-300">
-                    Cancel
-                </button>
                 <button onclick="rejectStudent()" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 mr-2">
                     Confirm Rejection
+                </button>
+                <button onclick="document.getElementById('reject-modal').classList.add('hidden')"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                    Cancel
                 </button>
             </div>
         </div>
@@ -198,89 +167,199 @@
 <script>
 let selectedStudentId = null;
 
+function debugLog(action, data) {
+    console.log(`[DEBUG ${new Date().toISOString()}] ${action}:`, data);
+}
+
 function viewDetails(studentId) {
-    selectedStudentId = studentId;
-    // Make AJAX call to get student details
-    // Show details modal
-    document.getElementById('details-modal').classList.remove('hidden');
+    debugLog('Viewing details for student', studentId);
+    debugLog('Request URL', `/dashboard/admin/student-details/${studentId}/`);
+
+    fetch(`/dashboard/admin/student-details/${studentId}/`)
+        .then(response => {
+            debugLog('Response status', response.status);
+            debugLog('Response headers', Object.fromEntries(response.headers.entries()));
+            return response.json();
+        })
+        .then(data => {
+            debugLog('Received student data', data);
+            const content = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Full Name</p>
+                            <p class="font-medium">${data.full_name}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Student ID</p>
+                            <p class="font-medium">${data.student_id}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Email</p>
+                            <p class="font-medium">${data.email}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Course</p>
+                            <p class="font-medium">${data.course}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Year Level</p>
+                            <p class="font-medium">${data.year_level}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Date Applied</p>
+                            <p class="font-medium">${data.date_applied}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500">Login Credentials</p>
+                        <div class="bg-gray-50 p-3 rounded-lg mt-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">Username: ${data.username}</span>
+                                <span class="font-medium">Password: student123</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button onclick="approveStudent('${data.id}')" 
+                                class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                            Approve
+                        </button>
+                        <button onclick="showRejectModal('${data.id}')" 
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                            Reject
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('student-details-content').innerHTML = content;
+            document.getElementById('details-modal').classList.remove('hidden');
+        })
+        .catch(error => {
+            debugLog('Error in viewDetails', error);
+            console.error('Error:', error);
+            showNotification('Error', 'Failed to load student details', 'error');
+        });
 }
 
 function approveStudent(studentId) {
-    if (!confirm('Are you sure you want to approve this student?')) return;
+    debugLog('Starting approval process for student', studentId);
     
-    fetch(`/dashboard/admin/approve-student/${studentId}/`, {
+    if (!confirm('Are you sure you want to approve this student?')) {
+        debugLog('Approval cancelled by user', studentId);
+        return;
+    }
+    
+    const csrftoken = getCookie('csrftoken');
+    debugLog('CSRF Token', csrftoken ? 'Found' : 'Not found');
+    debugLog('Request URL', `/admin/approve-student/${studentId}/`);
+
+    fetch(`/admin/approve-student/${studentId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': csrftoken,
             'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(response => {
+        debugLog('Approval response status', response.status);
+        debugLog('Approval response headers', Object.fromEntries(response.headers.entries()));
+        return response.json();
+    })
     .then(data => {
+        debugLog('Approval response data', data);
         if (data.success) {
-            document.getElementById(`student-row-${studentId}`).remove();
+            const row = document.getElementById(`student-row-${studentId}`);
+            debugLog('Found student row', !!row);
+            if (row) row.remove();
+            document.getElementById('details-modal').classList.add('hidden');
             showNotification('Success', 'Student approved successfully', 'success');
             updateStats();
         } else {
+            debugLog('Approval failed', data.error);
             showNotification('Error', data.error || 'Failed to approve student', 'error');
         }
     })
     .catch(error => {
-        showNotification('Error', 'An error occurred while processing your request.', 'error');
+        debugLog('Error in approveStudent', error);
+        console.error('Error:', error);
+        showNotification('Error', 'An error occurred while processing your request', 'error');
     });
 }
 
 function showRejectModal(studentId) {
+    debugLog('Showing reject modal for student', studentId);
     selectedStudentId = studentId;
     document.getElementById('reject-modal').classList.remove('hidden');
+    document.getElementById('details-modal').classList.add('hidden');
 }
 
 function rejectStudent() {
+    debugLog('Starting rejection process for student', selectedStudentId);
+    
     const reason = document.getElementById('rejection-reason').value.trim();
+    debugLog('Rejection reason', reason);
+    
     if (!reason) {
-        showNotification('Error', 'Please provide a reason for rejection.', 'error');
+        debugLog('Rejection cancelled - no reason provided');
+        showNotification('Error', 'Please provide a reason for rejection', 'error');
         return;
     }
 
-    fetch(`/dashboard/admin/reject-student/${selectedStudentId}/`, {
+    const csrftoken = getCookie('csrftoken');
+    debugLog('CSRF Token for rejection', csrftoken ? 'Found' : 'Not found');
+    debugLog('Rejection request URL', `/admin/reject-student/${selectedStudentId}/`);
+
+    fetch(`/admin/reject-student/${selectedStudentId}/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
+            'X-CSRFToken': csrftoken,
             'Content-Type': 'application/json',
         },
+        credentials: 'same-origin',
         body: JSON.stringify({ reason: reason })
     })
-    .then(response => response.json())
+    .then(response => {
+        debugLog('Rejection response status', response.status);
+        debugLog('Rejection response headers', Object.fromEntries(response.headers.entries()));
+        return response.json();
+    })
     .then(data => {
+        debugLog('Rejection response data', data);
         if (data.success) {
-            document.getElementById(`student-row-${selectedStudentId}`).remove();
-            closeModal('reject-modal');
-            showNotification('Success', 'Student rejected successfully', 'success');
+            const row = document.getElementById(`student-row-${selectedStudentId}`);
+            debugLog('Found student row for removal', !!row);
+            if (row) row.remove();
+            document.getElementById('reject-modal').classList.add('hidden');
+            showNotification('Success', 'Student application rejected', 'success');
             updateStats();
         } else {
+            debugLog('Rejection failed', data.error);
             showNotification('Error', data.error || 'Failed to reject student', 'error');
         }
     })
     .catch(error => {
-        showNotification('Error', 'An error occurred while processing your request.', 'error');
+        debugLog('Error in rejectStudent', error);
+        console.error('Error:', error);
+        showNotification('Error', 'An error occurred while processing your request', 'error');
     });
 }
 
-function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-    if (modalId === 'reject-modal') {
-        document.getElementById('rejection-reason').value = '';
-    }
-    selectedStudentId = null;
-}
-
 function updateStats() {
+    debugLog('Updating statistics');
     fetch('/dashboard/admin/get-approval-stats/')
-        .then(response => response.json())
+        .then(response => {
+            debugLog('Stats response status', response.status);
+            return response.json();
+        })
         .then(data => {
+            debugLog('Received stats data', data);
             document.querySelector('.total-pending').textContent = data.total_pending;
-            document.querySelector('.today-pending').textContent = data.today_pending;
-            document.querySelector('.total-approved').textContent = data.total_approved;
+        })
+        .catch(error => {
+            debugLog('Error updating stats', error);
         });
 }
 
@@ -290,24 +369,24 @@ function filterTable() {
     const rows = document.querySelectorAll('tbody tr');
 
     rows.forEach(row => {
-        const studentName = row.querySelector('.text-gray-900').textContent.toLowerCase();
-        const studentEmail = row.querySelector('.text-gray-500').textContent.toLowerCase();
-        const courseName = row.querySelector('.bg-emerald-100').textContent.trim();
+        const studentName = row.querySelector('.text-gray-900')?.textContent.toLowerCase() || '';
+        const studentEmail = row.querySelector('.text-gray-500')?.textContent.toLowerCase() || '';
+        const studentId = row.querySelector('td:nth-child(2)')?.textContent.trim() || '';
+        const courseName = row.querySelector('.bg-emerald-100')?.textContent.trim() || '';
 
-        const matchesSearch = studentName.includes(searchTerm) || studentEmail.includes(searchTerm);
+        const matchesSearch = studentName.includes(searchTerm) || 
+                            studentEmail.includes(searchTerm) || 
+                            studentId.includes(searchTerm);
         const matchesCourse = !courseFilter || courseName === courseFilter;
 
-        row.style.display = matchesSearch && matchesCourse ? '' : 'none';
+        row.classList.toggle('hidden', !matchesSearch || !matchesCourse);
     });
 }
 
-function resetFilters() {
-    document.getElementById('search').value = '';
-    document.getElementById('course-filter').value = '';
-    filterTable();
-}
+// Event listeners for search and filter
+document.getElementById('search').addEventListener('input', filterTable);
+document.getElementById('course-filter').addEventListener('change', filterTable);
 
-// Helper function to get CSRF token
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -323,8 +402,18 @@ function getCookie(name) {
     return cookieValue;
 }
 
-// Add event listeners
-document.getElementById('search').addEventListener('input', filterTable);
-document.getElementById('course-filter').addEventListener('change', filterTable);
+function showNotification(title, message, type) {
+    // You can use any notification library (like Toastr) or create a custom one
+    const notificationDiv = document.createElement('div');
+    notificationDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white`;
+    notificationDiv.innerHTML = `
+        <h4 class="font-bold">${title}</h4>
+        <p>${message}</p>
+    `;
+    document.body.appendChild(notificationDiv);
+    setTimeout(() => notificationDiv.remove(), 3000);
+}
 </script>
 {% endblock %}

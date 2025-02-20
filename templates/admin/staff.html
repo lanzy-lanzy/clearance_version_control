@@ -2,17 +2,65 @@
 {% load static %}
 
 {% block admin_content %}
-<div class="p-6">
-    <!-- Header Section -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Staff Management</h1>
-        <a href="{% url 'admin_staff_add' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700">
-            Add New Staff
-        </a>
+<div class="p-6 space-y-6">
+    <!-- Statistics Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Staff Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-emerald-100 mr-4">
+                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Staff</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ statistics.total_staff }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Staff Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 mr-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Active Staff</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ statistics.active_staff }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Offices Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-purple-100 mr-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Offices</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ statistics.total_offices }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Staff List -->
+    <!-- Staff List Section -->
     <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-gray-800">Staff Members</h2>
+                <a href="{% url 'admin_staff_add' %}" class="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition duration-150">
+                    Add New Staff
+                </a>
+            </div>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -60,8 +108,20 @@
                                 {{ staff_member.user.is_active|yesno:"Active,Inactive" }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <a href="{% url 'admin_staff_edit' staff_member.id %}" class="text-emerald-600 hover:text-emerald-900">Edit</a>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'admin_staff_edit' staff_member.id %}" 
+                               class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                            <button onclick="toggleStaffStatus('{{ staff_member.id }}')"
+                                    class="text-red-600 hover:text-red-900 mr-3">
+                                {{ staff_member.user.is_active|yesno:"Deactivate,Activate" }}
+                            </button>
+                            <button onclick="deleteStaff('{{ staff_member.id }}', '{{ staff_member.user.get_full_name|default:staff_member.user.username|escapejs }}')"
+                                    class="text-red-600 hover:text-red-900">
+                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Delete
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -76,4 +136,71 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleStaffStatus(staffId) {
+    if (!confirm('Are you sure you want to change this staff member\'s status?')) {
+        return;
+    }
+
+    fetch(`/api/staff/${staffId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to update staff status');
+        }
+    })
+    .catch(error => {
+        alert('An error occurred while updating staff status');
+    });
+}
+
+function deleteStaff(staffId, staffName) {
+    if (!confirm(`Are you sure you want to delete staff member "${staffName}"? This action cannot be undone.`)) {
+        return;
+    }
+
+    fetch(`/api/staff/${staffId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to delete staff member');
+        }
+    })
+    .catch(error => {
+        alert('An error occurred while deleting staff member');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}
