@@ -64,9 +64,7 @@ urlpatterns = [
     path('admin/student-details/<int:student_id>/', views.get_student_details, name='get_student_details'),
     # Add missing stats endpoint (example)
     path('dashboard/admin/get-approval-stats/', views.get_approval_stats, name='get_approval_stats'),
+    path('api/courses-by-dean/<str:dean_name>/', views.get_courses_by_dean, name='courses_by_dean'),
+    path('api/program-chairs/<int:dean_id>/', views.get_program_chairs, name='get_program_chairs'),
+    path('api/courses/<int:dean_id>/', views.get_courses, name='get_courses'),  # Remove any login_required decorator
 ]
-
-
-
-
-

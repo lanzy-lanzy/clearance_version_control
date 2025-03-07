@@ -146,7 +146,7 @@ def register(request):
             messages.error(request, f'Registration error: {str(e)}')
             
     context = {
-        'program_chairs': ProgramChair.objects.all(),
+        'deans': Dean.objects.all().order_by('name'),  # Order deans alphabetically
         'dormitory_owners': Staff.objects.filter(is_dormitory_owner=True)
     }
     return render(request, 'registration/register.html', context)
@@ -1187,15 +1187,48 @@ def print_permit(request, student_id):
 @login_required
 def get_program_chairs(request, dean_id):
     program_chairs = ProgramChair.objects.filter(dean_id=dean_id).select_related('user')
-    data = [{'id': pc.id, 'user': {'full_name': f"{pc.user.first_name} {pc.user.last_name}"}} 
-            for pc in program_chairs]
+    data = [{
+        'id': pc.id,
+        'user': {
+            'full_name': f"{pc.user.get_full_name()}"
+        }
+    } for pc in program_chairs]
     return JsonResponse(data, safe=False)
 
-@login_required
+from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+from .models import Course, Dean
+
 def get_courses(request, dean_id):
-    courses = Course.objects.filter(dean_id=dean_id)
-    data = [{'id': course.id, 'code': course.code} for course in courses]
-    return JsonResponse(data, safe=False)
+    """
+    Get courses for a specific dean. This endpoint is public and doesn't require authentication
+    since it's used on the registration page.
+    """
+    try:
+        # Get active courses for this dean
+        courses = Course.objects.filter(
+            dean_id=dean_id,
+            is_active=True
+        ).order_by('code')
+        
+        data = [{
+            'id': course.id,
+            'code': course.code,
+            'name': course.name
+        } for course in courses]
+        
+        return JsonResponse(data, safe=False)
+    
+    except ObjectDoesNotExist:
+        return JsonResponse(
+            {'error': 'Dean not found'}, 
+            status=404
+        )
+    except Exception as e:
+        return JsonResponse(
+            {'error': str(e)}, 
+            status=500
+        )
 
 @login_required
 def get_offices(request, dean_id):
@@ -1316,7 +1349,19 @@ def get_approval_stats(request):
     total_pending = Student.objects.filter(user__is_active=False).count()
     return JsonResponse({'total_pending': total_pending})
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from .models import Course, Dean  # Import your models
 
+@require_http_methods(["GET"])
+def get_courses_by_dean(request, dean_name):
+    try:
+        dean = Dean.objects.get(name=dean_name)
+        courses = Course.objects.filter(dean=dean)
+        data = [{'code': course.code, 'name': course.name} for course in courses]
+        return JsonResponse(data, safe=False)
+    except Dean.DoesNotExist:
+        return JsonResponse([], safe=False)
 
 
 

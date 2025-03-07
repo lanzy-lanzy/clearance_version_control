@@ -136,31 +136,26 @@
 						</div>
 						<!-- Dean Selection -->
 						<div>
-							<label for="program_chair" class="block text-sm font-medium text-gray-700">
+							<label for="dean" class="block text-sm font-medium text-gray-700">
 								<i class="fas fa-user-tie mr-2 text-emerald-600"></i>Choose your Dean
 							</label>
-							<select name="program_chair" id="program_chair" required
+							<select name="dean" id="dean" required
 									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
 								<option value="">Select your dean</option>
-								{% for chair in program_chairs %}
-									{% if 'SSB' not in chair.dean.name %}
-										<option value="{{ chair.id }}" data-dean="{{ chair.dean.name }}">
-											{{ chair.user.get_full_name }} - {{ chair.dean.name }}
-										</option>
-									{% endif %}
+								{% for dean in deans %}
+									<option value="{{ dean.id }}">{{ dean.name }}</option>
 								{% endfor %}
 							</select>
 						</div>
-
 
 						<!-- Course Selection -->
 						<div>
 							<label for="course" class="block text-sm font-medium text-gray-700">
 								<i class="fas fa-book mr-2 text-emerald-600"></i>Course
 							</label>
-							<select name="course" id="course" required
+							<select name="course" id="course" required disabled
 									class="mt-1 block w-full px-4 py-2 border border-emerald-300 rounded-lg focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 input-focus-effect">
-								<option value="">Select your course</option>
+								<option value="">First select a dean</option>
 							</select>
 						</div>
 
@@ -261,30 +256,50 @@ isBoarderCheckbox.addEventListener('change', () => {
     }
 });
 
-// Keep the existing courses by school logic
-const coursesBySchool = {
-    'SET DEAN': ['BSIT', 'BSCS'],
-    'STE DEAN': ['BPED', 'BEED', 'BSED', 'BAELS', 'BSMATH'],
-    'SOCJE DEAN': ['BSCRIM', 'BSISM'],
-    'SAFES DEAN': ['BSA', 'BSAES', 'BCF']
-};
-
-const programChairSelect = document.getElementById('program_chair');
+const deanSelect = document.getElementById('dean');
 const courseSelect = document.getElementById('course');
 
-programChairSelect.addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const deanName = selectedOption.getAttribute('data-dean');
-    const courses = coursesBySchool[deanName] || [];
+deanSelect.addEventListener('change', async function() {
+    const deanId = this.value;
     
+    // Clear and disable course select
     courseSelect.innerHTML = '<option value="">Select your course</option>';
+    courseSelect.disabled = true;
     
-    courses.forEach(course => {
-        const option = document.createElement('option');
-        option.value = course;
-        option.textContent = course;
-        courseSelect.appendChild(option);
-    });
+    if (!deanId) {
+        courseSelect.innerHTML = '<option value="">First select a dean</option>';
+        return;
+    }
+
+    try {
+        // Show loading state
+        courseSelect.innerHTML = '<option value="">Loading courses...</option>';
+
+        // Fetch courses for the selected dean
+        const response = await fetch(`/api/courses/${deanId}/`);
+        if (!response.ok) throw new Error('Failed to fetch courses');
+        const courses = await response.json();
+        
+        if (courses.length === 0) {
+            courseSelect.innerHTML = '<option value="">No courses available for this dean</option>';
+            return;
+        }
+
+        // Reset select with new options
+        courseSelect.innerHTML = '<option value="">Select your course</option>';
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.id;  // Using course ID instead of code
+            option.textContent = `${course.code} - ${course.name}`;
+            courseSelect.appendChild(option);
+        });
+        
+        // Enable course selection
+        courseSelect.disabled = false;
+    } catch (error) {
+        console.error('Error:', error);
+        courseSelect.innerHTML = '<option value="">Error loading courses</option>';
+    }
 });
 
 // Add input focus effect to all form controls
@@ -322,5 +337,88 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deanSelect = document.getElementById('dean');
+    const courseSelect = document.getElementById('course');
+    
+    // Get CSRF token from the cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    deanSelect.addEventListener('change', async function() {
+        const deanId = this.value;
+        
+        // Clear and disable course select
+        courseSelect.innerHTML = '<option value="">Select your course</option>';
+        courseSelect.disabled = true;
+        
+        if (!deanId) {
+            courseSelect.innerHTML = '<option value="">First select a dean</option>';
+            return;
+        }
+
+        try {
+            // Show loading state
+            courseSelect.innerHTML = '<option value="">Loading courses...</option>';
+
+            // Fetch courses for the selected dean
+            const response = await fetch(`/api/courses/${deanId}/`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'  // This is important for sending cookies
+            });
+
+            if (response.redirected) {
+                courseSelect.innerHTML = '<option value="">Please log in to view courses</option>';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const courses = await response.json();
+            
+            if (!Array.isArray(courses) || courses.length === 0) {
+                courseSelect.innerHTML = '<option value="">No courses available for this dean</option>';
+                return;
+            }
+
+            // Reset select with new options
+            courseSelect.innerHTML = '<option value="">Select your course</option>';
+            courses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = `${course.code} - ${course.name}`;
+                courseSelect.appendChild(option);
+            });
+            
+            // Enable course selection
+            courseSelect.disabled = false;
+
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+            courseSelect.innerHTML = '<option value="">Error loading courses. Please try again.</option>';
+        }
+    });
+});
 </script>
 {% endblock %}
