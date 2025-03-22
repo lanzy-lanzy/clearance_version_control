@@ -216,6 +216,16 @@ function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
     const submitBtn = document.getElementById('submitBtn');
+    const courseSelect = document.getElementById('course');
+    
+    // Debug log
+    console.log('Selected course value:', courseSelect.value);
+    
+    // Validate course selection
+    if (!courseSelect.value) {
+        alert('Please select a course');
+        return false;
+    }
     
     // Disable the button and show spinner
     submitBtn.disabled = true;
@@ -342,27 +352,21 @@ document.head.appendChild(style);
 document.addEventListener('DOMContentLoaded', function() {
     const deanSelect = document.getElementById('dean');
     const courseSelect = document.getElementById('course');
+    const registerForm = document.getElementById('registerForm');
     
-    // Get CSRF token from the cookie
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    // Debug form submission
+    registerForm.addEventListener('submit', function(e) {
+        const formData = new FormData(this);
+        console.log('Form data being submitted:');
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
         }
-        return cookieValue;
-    }
-
+    });
+    
     deanSelect.addEventListener('change', async function() {
         const deanId = this.value;
+        console.log('Selected dean ID:', deanId);
         
-        // Clear and disable course select
         courseSelect.innerHTML = '<option value="">Select your course</option>';
         courseSelect.disabled = true;
         
@@ -372,46 +376,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Show loading state
             courseSelect.innerHTML = '<option value="">Loading courses...</option>';
 
-            // Fetch courses for the selected dean
-            const response = await fetch(`/api/courses/${deanId}/`, {
-                method: 'GET',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'  // This is important for sending cookies
-            });
-
-            if (response.redirected) {
-                courseSelect.innerHTML = '<option value="">Please log in to view courses</option>';
-                return;
-            }
-
+            const response = await fetch(`/api/courses/${deanId}/`);
+            console.log('API Response:', response);
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const courses = await response.json();
+            console.log('Received courses:', courses);
             
             if (!Array.isArray(courses) || courses.length === 0) {
                 courseSelect.innerHTML = '<option value="">No courses available for this dean</option>';
                 return;
             }
 
-            // Reset select with new options
             courseSelect.innerHTML = '<option value="">Select your course</option>';
             courses.forEach(course => {
                 const option = document.createElement('option');
                 option.value = course.id;
                 option.textContent = `${course.code} - ${course.name}`;
                 courseSelect.appendChild(option);
+                console.log(`Added course option: ${course.code} - ${course.name} (ID: ${course.id})`);
             });
             
-            // Enable course selection
             courseSelect.disabled = false;
 
         } catch (error) {

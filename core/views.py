@@ -107,6 +107,11 @@ def register(request):
     
     if request.method == 'POST':
         try:
+            # Debug logging
+            course_id = request.POST.get('course')
+            print(f"Received course ID: {course_id}")
+            print(f"All POST data: {request.POST}")
+            
             username = request.POST.get('username')
             if User.objects.filter(username=username).exists():
                 messages.error(request, 'Username already exists.')
@@ -126,7 +131,14 @@ def register(request):
                 is_active=False
             )
             
-            course = Course.objects.get(code=request.POST.get('course'))
+            try:
+                course = Course.objects.get(id=course_id)
+                print(f"Found course: {course.code} - {course.name}")
+            except Course.DoesNotExist:
+                print(f"No course found with ID: {course_id}")
+                available_courses = Course.objects.all()
+                print(f"Available course IDs: {[c.id for c in available_courses]}")
+                raise Exception(f"Course with ID {course_id} does not exist")
             
             Student.objects.create(
                 user=user,
@@ -146,7 +158,7 @@ def register(request):
             messages.error(request, f'Registration error: {str(e)}')
             
     context = {
-        'deans': Dean.objects.all().order_by('name'),  # Order deans alphabetically
+        'deans': Dean.objects.all().order_by('name'),
         'dormitory_owners': Staff.objects.filter(is_dormitory_owner=True)
     }
     return render(request, 'registration/register.html', context)
@@ -1205,11 +1217,16 @@ def get_courses(request, dean_id):
     since it's used on the registration page.
     """
     try:
-        # Get active courses for this dean
+        # Debug logging
+        print(f"Fetching courses for dean_id: {dean_id}")
+        
         courses = Course.objects.filter(
             dean_id=dean_id,
             is_active=True
         ).order_by('code')
+        
+        # Debug logging
+        print(f"Found courses: {[f'{c.code} (ID: {c.id})' for c in courses]}")
         
         data = [{
             'id': course.id,
@@ -1220,11 +1237,13 @@ def get_courses(request, dean_id):
         return JsonResponse(data, safe=False)
     
     except ObjectDoesNotExist:
+        print(f"Dean not found with ID: {dean_id}")
         return JsonResponse(
             {'error': 'Dean not found'}, 
             status=404
         )
     except Exception as e:
+        print(f"Error fetching courses: {str(e)}")
         return JsonResponse(
             {'error': str(e)}, 
             status=500
@@ -1362,6 +1381,24 @@ def get_courses_by_dean(request, dean_name):
         return JsonResponse(data, safe=False)
     except Dean.DoesNotExist:
         return JsonResponse([], safe=False)
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def clearance_details(request, clearance_id):
+    clearance = get_object_or_404(Clearance.objects.select_related(
+        'student',
+        'student__user',
+        'student__course'
+    ), id=clearance_id)
+    
+    clearance_requests = ClearanceRequest.objects.filter(
+        clearance=clearance
+    ).select_related('office', 'staff')
+    
+    return render(request, 'admin/clearance_details.html', {
+        'clearance': clearance,
+        'clearance_requests': clearance_requests,
+    })
 
 
 
