@@ -427,27 +427,43 @@ class StudentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 # Staff Views
 @login_required
 def staff_dashboard(request):
-    try:
-        staff = request.user.staff
-        recent_requests = ClearanceRequest.objects.filter(
-            office=staff.office
-        ).select_related('student__user').order_by('-request_date')[:10]
-        
-        context = {
-            'current_semester': get_current_semester(),
-            'recent_requests': recent_requests,
-            'pending_requests_count': ClearanceRequest.objects.filter(
-                office=staff.office, status='pending').count(),
-            'approved_today_count': ClearanceRequest.objects.filter(
-                office=staff.office, status='approved',
-                reviewed_date__date=timezone.now().date()).count(),
-            'total_processed': ClearanceRequest.objects.filter(
-                office=staff.office, status__in=['approved', 'denied']).count(),
-        }
-        return render(request, 'core/staff_dashboard.html', context)
-    except Staff.DoesNotExist:
-        messages.error(request, "Staff profile not found.")
-        return redirect('home')
+    staff = request.user.staff
+    
+    # Get current school year and semester
+    current_year = timezone.now().year
+    school_year = f"{current_year}-{current_year + 1}"
+    semester = get_current_semester()
+    
+    # Get recent requests for this office
+    recent_requests = ClearanceRequest.objects.filter(
+        office=staff.office
+    ).select_related(
+        'student__user',
+        'student__course'
+    ).order_by('-request_date')[:10]  # Get last 10 requests using request_date
+    
+    # Get pending requests count
+    pending_requests_count = ClearanceRequest.objects.filter(
+        office=staff.office,
+        status='pending'
+    ).count()
+    
+    # Get approved requests count for today
+    today = timezone.now().date()
+    approved_today_count = ClearanceRequest.objects.filter(
+        office=staff.office,
+        status='approved',
+        reviewed_date__date=today
+    ).count()
+    
+    return render(request, 'core/staff_dashboard.html', {
+        'recent_requests': recent_requests,
+        'pending_requests_count': pending_requests_count,
+        'approved_today_count': approved_today_count,
+        'school_year': school_year,
+        'current_semester': semester,
+        'office': staff.office,
+    })
 
 @login_required
 def staff_profile(request):
