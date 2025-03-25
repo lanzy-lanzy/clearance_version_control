@@ -418,7 +418,7 @@ class StudentDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get_queryset(self):
         return Student.objects.filter(
             course__dean=self.request.user.programchair.dean
-        ).select_related('user', 'course', 'program_chair', 'program_chair__user')
+        ).select_related('user', 'course')  # Remove 'program_chair' and 'program_chair__user'
 
     def handle_no_permission(self):
         messages.error(self.request, "Permission denied.")

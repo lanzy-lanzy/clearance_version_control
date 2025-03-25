@@ -72,7 +72,7 @@ Program Chair Dashboard
         <tbody class="divide-y divide-emerald-100">
           {% for student in students %}
           <tr class="hover:bg-emerald-50 transition-colors duration-200">
-            <td class="px-4 py-3 font-medium text-emerald-900">{{ student.full_name }}</td>
+            <td class="px-4 py-3 font-medium text-emerald-900">{{ student.user.get_full_name }}</td>
             <td class="px-4 py-3 text-emerald-800">{{ student.student_id }}</td>
             <td class="px-4 py-3 text-emerald-800">{{ student.course.code }}</td>
             <td class="px-4 py-3 text-emerald-800">{{ student.year_level }}</td>
